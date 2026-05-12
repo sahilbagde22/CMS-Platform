@@ -53,19 +53,28 @@ function normalizeHeader(rawHeader: string): string | null {
 /**
  * Build a header mapping: originalHeader → canonicalName | null
  */
-function buildHeaderMap(headers: string[]): Map<string, string | null> {
-  const map = new Map<string, string | null>();
+export function getSuggestedMappings(headers: string[]): Record<string, string | null> {
+  const map: Record<string, string | null> = {};
   const usedCanonicals = new Set<string>();
 
   for (const header of headers) {
     const canonical = normalizeHeader(header);
     // Avoid mapping two different original columns to the same canonical name
     if (canonical && !usedCanonicals.has(canonical)) {
-      map.set(header, canonical);
+      map[header] = canonical;
       usedCanonicals.add(canonical);
     } else {
-      map.set(header, null);
+      map[header] = null;
     }
+  }
+  return map;
+}
+
+function buildHeaderMap(headers: string[]): Map<string, string | null> {
+  const suggested = getSuggestedMappings(headers);
+  const map = new Map<string, string | null>();
+  for (const [k, v] of Object.entries(suggested)) {
+    map.set(k, v);
   }
   return map;
 }
@@ -136,8 +145,13 @@ function parseString(raw: unknown): string | null {
  * Normalize a raw Employee_Master sheet into typed rows.
  * Applies column mapping + value coercion + status normalization.
  */
-export function normalizeEmployeeSheet(sheet: ParsedSheet): EmployeeRowInput[] {
-  const headerMap = buildHeaderMap(sheet.headers);
+export function normalizeEmployeeSheet(sheet: ParsedSheet, customMappings?: Record<string, string | null>): EmployeeRowInput[] {
+  let headerMap: Map<string, string | null>;
+  if (customMappings) {
+    headerMap = new Map(Object.entries(customMappings));
+  } else {
+    headerMap = buildHeaderMap(sheet.headers);
+  }
 
   return sheet.rows.map((raw) => {
     const get = (canonical: string): unknown => {
@@ -170,8 +184,13 @@ export function normalizeEmployeeSheet(sheet: ParsedSheet): EmployeeRowInput[] {
 /**
  * Normalize a raw Project_Master sheet into typed rows.
  */
-export function normalizeProjectSheet(sheet: ParsedSheet): ProjectRowInput[] {
-  const headerMap = buildHeaderMap(sheet.headers);
+export function normalizeProjectSheet(sheet: ParsedSheet, customMappings?: Record<string, string | null>): ProjectRowInput[] {
+  let headerMap: Map<string, string | null>;
+  if (customMappings) {
+    headerMap = new Map(Object.entries(customMappings));
+  } else {
+    headerMap = buildHeaderMap(sheet.headers);
+  }
 
   return sheet.rows.map((raw) => {
     const get = (canonical: string): unknown => {
@@ -197,8 +216,13 @@ export function normalizeProjectSheet(sheet: ParsedSheet): ProjectRowInput[] {
 /**
  * Normalize a raw Deployment_Log sheet into typed rows.
  */
-export function normalizeDeploymentSheet(sheet: ParsedSheet): DeploymentRowInput[] {
-  const headerMap = buildHeaderMap(sheet.headers);
+export function normalizeDeploymentSheet(sheet: ParsedSheet, customMappings?: Record<string, string | null>): DeploymentRowInput[] {
+  let headerMap: Map<string, string | null>;
+  if (customMappings) {
+    headerMap = new Map(Object.entries(customMappings));
+  } else {
+    headerMap = buildHeaderMap(sheet.headers);
+  }
 
   return sheet.rows.map((raw) => {
     const get = (canonical: string): unknown => {

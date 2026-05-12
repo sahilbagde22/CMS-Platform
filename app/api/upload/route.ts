@@ -48,6 +48,16 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse<U
     // 1. Parse form data
     const formData = await req.formData();
     const file = formData.get('file') as File | null;
+    const mappingsStr = formData.get('mappings') as string | null;
+    let customMappings: Record<string, Record<string, string | null>> | undefined = undefined;
+
+    if (mappingsStr) {
+      try {
+        customMappings = JSON.parse(mappingsStr);
+      } catch (e) {
+        return NextResponse.json({ success: false, error: 'Invalid mappings JSON format', code: 'INVALID_MAPPINGS' }, { status: 400 });
+      }
+    }
 
     if (!file) {
       return NextResponse.json(
@@ -137,9 +147,9 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse<U
       const projectSheet = findSheet(parsedSheets, SHEET_NAMES.PROJECT_MASTER)!;
       const deploymentSheet = findSheet(parsedSheets, SHEET_NAMES.DEPLOYMENT_LOG)!;
 
-      const rawEmployees = normalizeEmployeeSheet(employeeSheet);
-      const rawProjects = normalizeProjectSheet(projectSheet);
-      const rawDeployments = normalizeDeploymentSheet(deploymentSheet);
+      const rawEmployees = normalizeEmployeeSheet(employeeSheet, customMappings?.[SHEET_NAMES.EMPLOYEE_MASTER]);
+      const rawProjects = normalizeProjectSheet(projectSheet, customMappings?.[SHEET_NAMES.PROJECT_MASTER]);
+      const rawDeployments = normalizeDeploymentSheet(deploymentSheet, customMappings?.[SHEET_NAMES.DEPLOYMENT_LOG]);
 
       // 9. Validate rows with Zod (filter out invalid rows with warning)
       const validEmployees = rawEmployees

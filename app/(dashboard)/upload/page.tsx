@@ -4,37 +4,97 @@ import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import {
   Upload, CheckCircle, XCircle, AlertTriangle,
-  FileSpreadsheet, Loader2, ArrowRight,
+  FileSpreadsheet, Loader2, ArrowRight, TableProperties
 } from 'lucide-react';
 import Link from 'next/link';
 import type { SheetValidationWarning } from '@/types/app.types';
+import {
+  EMPLOYEE_MASTER_COLUMNS,
+  PROJECT_MASTER_COLUMNS,
+  DEPLOYMENT_LOG_COLUMNS,
+} from '@/lib/constants/columns';
+import { SHEET_NAMES } from '@/lib/constants/sheets';
 
-type UploadState = 'idle' | 'uploading' | 'success' | 'error';
+type UploadState = 'idle' | 'uploading' | 'mapping' | 'processing' | 'success' | 'error';
+
+interface PreviewSheet {
+  sheetName: string;
+  headers: string[];
+  suggestedMappings: Record<string, string | null>;
+}
 
 interface UploadResult {
   uploadId: string;
   warnings: SheetValidationWarning[];
 }
 
-const REQUIRED_SHEETS = ['Employee_Master', 'Project_Master', 'Deployment_Log'];
+const REQUIRED_SHEETS = [SHEET_NAMES.EMPLOYEE_MASTER, SHEET_NAMES.PROJECT_MASTER, SHEET_NAMES.DEPLOYMENT_LOG];
+
+const SHEET_COLUMNS_MAP: Record<string, readonly string[]> = {
+  [SHEET_NAMES.EMPLOYEE_MASTER]: EMPLOYEE_MASTER_COLUMNS,
+  [SHEET_NAMES.PROJECT_MASTER]: PROJECT_MASTER_COLUMNS,
+  [SHEET_NAMES.DEPLOYMENT_LOG]: DEPLOYMENT_LOG_COLUMNS,
+};
 
 export default function UploadPage() {
   const [state, setState] = useState<UploadState>('idle');
   const [file, setFile] = useState<File | null>(null);
+  const [previewSheets, setPreviewSheets] = useState<PreviewSheet[]>([]);
+  
+  // mappings: { [sheetName]: { [originalHeader]: canonicalHeader | null } }
+  const [mappings, setMappings] = useState<Record<string, Record<string, string | null>>>({});
+  
   const [result, setResult] = useState<UploadResult | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
 
-  const upload = async (f: File) => {
+  const handlePreview = async (f: File) => {
     setState('uploading');
-    setProgress(10);
+    setProgress(30);
     setErrorMsg(null);
     setResult(null);
 
     try {
       const fd = new FormData();
       fd.append('file', f);
-      setProgress(30);
+      setProgress(60);
+
+      const res = await fetch('/api/upload/preview', { method: 'POST', body: fd });
+      const json = await res.json();
+      setProgress(100);
+
+      if (!res.ok || !json.success) {
+        throw new Error(json.error ?? 'Failed to parse file');
+      }
+
+      setPreviewSheets(json.data.sheets);
+      
+      // Initialize mappings state with suggestions
+      const initialMappings: Record<string, Record<string, string | null>> = {};
+      json.data.sheets.forEach((sheet: PreviewSheet) => {
+        initialMappings[sheet.sheetName] = { ...sheet.suggestedMappings };
+      });
+      setMappings(initialMappings);
+      
+      setState('mapping');
+    } catch (err) {
+      setErrorMsg(err instanceof Error ? err.message : 'Unknown error');
+      setState('error');
+    }
+  };
+
+  const handleProcess = async () => {
+    if (!file) return;
+    
+    setState('processing');
+    setProgress(10);
+    setErrorMsg(null);
+
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('mappings', JSON.stringify(mappings));
+      setProgress(40);
 
       const res = await fetch('/api/upload', { method: 'POST', body: fd });
       setProgress(80);
@@ -56,7 +116,7 @@ export default function UploadPage() {
 
   const onDrop = useCallback((accepted: File[]) => {
     const f = accepted[0];
-    if (f) { setFile(f); upload(f); }
+    if (f) { setFile(f); handlePreview(f); }
   }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -66,7 +126,7 @@ export default function UploadPage() {
       'application/vnd.ms-excel': ['.xls'],
     },
     maxFiles: 1,
-    disabled: state === 'uploading',
+    disabled: state === 'uploading' || state === 'processing',
   });
 
   const reset = () => {
@@ -75,10 +135,22 @@ export default function UploadPage() {
     setResult(null);
     setErrorMsg(null);
     setProgress(0);
+    setPreviewSheets([]);
+    setMappings({});
+  };
+
+  const handleMappingChange = (sheetName: string, originalHeader: string, value: string) => {
+    setMappings(prev => ({
+      ...prev,
+      [sheetName]: {
+        ...prev[sheetName],
+        [originalHeader]: value === 'ignore' ? null : value
+      }
+    }));
   };
 
   return (
-    <div className="p-6 max-w-2xl mx-auto space-y-6">
+    <div className="p-6 max-w-4xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-white">Upload Excel File</h1>
         <p className="text-slate-400 text-sm mt-1">
@@ -120,13 +192,15 @@ export default function UploadPage() {
         </div>
       )}
 
-      {/* Uploading State */}
-      {state === 'uploading' && (
+      {/* Uploading/Processing State */}
+      {(state === 'uploading' || state === 'processing') && (
         <div className="border border-slate-800/60 bg-slate-900/50 rounded-2xl p-8 text-center space-y-4">
           <Loader2 className="w-8 h-8 text-violet-400 animate-spin mx-auto" />
           <div>
             <p className="text-white font-medium">{file?.name}</p>
-            <p className="text-slate-400 text-sm mt-1">Processing your data…</p>
+            <p className="text-slate-400 text-sm mt-1">
+              {state === 'uploading' ? 'Analyzing your Excel file...' : 'Processing data and calculating metrics...'}
+            </p>
           </div>
           <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden mx-auto max-w-xs">
             <div
@@ -134,11 +208,84 @@ export default function UploadPage() {
               style={{ width: `${progress}%` }}
             />
           </div>
-          <div className="flex justify-center gap-6 text-xs text-slate-500">
-            <span className={progress >= 30 ? 'text-violet-400' : ''}>Parsing Excel</span>
-            <span className={progress >= 50 ? 'text-violet-400' : ''}>Validating sheets</span>
-            <span className={progress >= 70 ? 'text-violet-400' : ''}>Storing data</span>
-            <span className={progress >= 90 ? 'text-violet-400' : ''}>Calculating metrics</span>
+        </div>
+      )}
+
+      {/* Mapping State */}
+      {state === 'mapping' && (
+        <div className="space-y-6">
+          <div className="border border-violet-500/20 bg-violet-500/10 rounded-2xl p-6">
+            <div className="flex items-center gap-3 mb-2">
+              <TableProperties className="w-6 h-6 text-violet-400 shrink-0" />
+              <p className="text-white font-semibold">Review Column Mappings</p>
+            </div>
+            <p className="text-violet-300 text-sm pl-9">
+              We&apos;ve automatically matched your Excel headers to the database columns. 
+              Please verify them below before saving.
+            </p>
+          </div>
+
+          <div className="space-y-6">
+            {previewSheets
+              .filter(sheet => SHEET_COLUMNS_MAP[sheet.sheetName]) // Only show required sheets
+              .map((sheet) => {
+              const availableColumns = SHEET_COLUMNS_MAP[sheet.sheetName] || [];
+              
+              return (
+                <div key={sheet.sheetName} className="bg-slate-900/50 border border-slate-800/60 rounded-2xl overflow-hidden">
+                  <div className="px-5 py-3 border-b border-slate-800/60 bg-slate-800/20">
+                    <h3 className="text-sm font-semibold text-white font-mono">{sheet.sheetName}</h3>
+                  </div>
+                  <div className="p-5">
+                    <div className="grid grid-cols-2 gap-4 text-xs font-medium text-slate-400 mb-3 px-2">
+                      <div>Your Excel Header</div>
+                      <div>Maps to Database Column</div>
+                    </div>
+                    <div className="space-y-2">
+                      {sheet.headers.map((header) => {
+                        const currentValue = mappings[sheet.sheetName]?.[header] ?? 'ignore';
+                        return (
+                          <div key={header} className="grid grid-cols-2 gap-4 items-center bg-slate-800/30 p-2 rounded-lg border border-slate-700/50">
+                            <div className="text-sm text-slate-300 truncate font-mono px-2" title={header}>
+                              {header}
+                            </div>
+                            <select
+                              value={currentValue}
+                              onChange={(e) => handleMappingChange(sheet.sheetName, header, e.target.value)}
+                              className={`
+                                w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-sm outline-none transition-colors
+                                ${currentValue === 'ignore' ? 'text-slate-500' : 'text-emerald-400 border-emerald-500/30 bg-emerald-500/5'}
+                                focus:border-violet-500 focus:ring-1 focus:ring-violet-500
+                              `}
+                            >
+                              <option value="ignore">-- Ignore Column --</option>
+                              {availableColumns.map(col => (
+                                <option key={col} value={col}>{col}</option>
+                              ))}
+                            </select>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-800/60">
+            <button
+              onClick={reset}
+              className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium rounded-xl transition-all"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleProcess}
+              className="flex items-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium rounded-xl transition-all shadow-lg shadow-violet-500/20"
+            >
+              Confirm & Process Data <ArrowRight className="w-4 h-4" />
+            </button>
           </div>
         </div>
       )}
@@ -156,20 +303,6 @@ export default function UploadPage() {
             </div>
             <p className="text-xs text-emerald-600 font-mono">Upload ID: {result.uploadId}</p>
           </div>
-
-          {result.warnings.length > 0 && (
-            <div className="border border-amber-500/20 bg-amber-500/10 rounded-2xl p-4 space-y-2">
-              <div className="flex items-center gap-2 mb-2">
-                <AlertTriangle className="w-4 h-4 text-amber-400" />
-                <p className="text-sm font-medium text-amber-300">{result.warnings.length} normalization notice{result.warnings.length > 1 ? 's' : ''}</p>
-              </div>
-              {result.warnings.map((w, i) => (
-                <div key={i} className="text-xs text-amber-500/80 pl-6">
-                  <span className="font-medium text-amber-400">[{w.sheet}]</span> {w.message}
-                </div>
-              ))}
-            </div>
-          )}
 
           <div className="flex gap-3">
             <Link
@@ -204,17 +337,6 @@ export default function UploadPage() {
           >
             <Upload className="w-4 h-4" /> Try Again
           </button>
-        </div>
-      )}
-
-      {/* Validation notes */}
-      {state === 'idle' && (
-        <div className="text-xs text-slate-600 space-y-1">
-          <p>✓ Maximum file size: 10MB</p>
-          <p>✓ Column names are fuzzy-matched — exact spelling not required</p>
-          <p>✓ Currency values (₹, commas) are auto-cleaned</p>
-          <p>✓ Dates are automatically normalized to ISO format</p>
-          <p>✓ All metrics are calculated automatically on upload</p>
         </div>
       )}
     </div>

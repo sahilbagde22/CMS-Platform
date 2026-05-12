@@ -9,7 +9,10 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { MetricCard } from '@/components/shared/MetricCard';
 import { EmptyState } from '@/components/shared/EmptyState';
+import { AiInsights } from '@/components/dashboard/AiInsights';
+import { AlertsPanel } from '@/components/dashboard/AlertsPanel';
 import { formatCurrency } from '@/lib/utils/format-currency';
+
 import { formatPercentage } from '@/lib/utils/format-percentage';
 import type { OverviewData } from '@/types/app.types';
 
@@ -227,6 +230,12 @@ export default function OverviewPage() {
           Upload New
         </Link>
       </div>
+
+      {/* AI Executive Summary */}
+      <AiInsights />
+
+      {/* Smart Alerts */}
+      <AlertsPanel />
 
       {/* KPI Cards — 6 across on desktop */}
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">

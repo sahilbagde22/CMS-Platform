@@ -9,7 +9,10 @@ import {
   FolderKanban,
   Upload,
   Activity,
+  LogOut,
 } from 'lucide-react';
+import { logout } from '@/app/actions/auth';
+import { SearchTriggerButton } from '@/components/layout/CommandPalette';
 
 const NAV_ITEMS = [
   { href: '/overview', label: 'Overview', icon: LayoutDashboard },
@@ -34,8 +37,13 @@ export function Sidebar() {
         </div>
       </div>
 
+      {/* Search trigger */}
+      <div className="px-3 pt-3 pb-1">
+        <SearchTriggerButton />
+      </div>
+
       {/* Nav */}
-      <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+      <nav className="flex-1 px-3 py-2 space-y-0.5 overflow-y-auto">
         {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
           const isActive =
             href === '/overview'
@@ -62,8 +70,14 @@ export function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="px-4 py-3 border-t border-slate-800/60 shrink-0">
-        <p className="text-xs text-slate-600 text-center">OpsHive v1.0 · Phase 1</p>
+      <div className="px-4 py-3 border-t border-slate-800/60 shrink-0 space-y-3">
+        <button
+          onClick={() => logout()}
+          className="flex w-full items-center justify-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium rounded-xl transition-all"
+        >
+          <LogOut className="w-4 h-4" /> Sign Out
+        </button>
+        <p className="text-xs text-slate-600 text-center">OpsHive v2.0</p>
       </div>
     </aside>
   );

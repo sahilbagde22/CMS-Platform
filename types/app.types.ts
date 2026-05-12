@@ -1,5 +1,30 @@
 import type { DeploymentStatus, EmployeeStatus } from '@/lib/constants/status';
 
+// ─── Smart Alerts ──────────────────────────────────────────────────────────────
+
+export type AlertSeverity = 'critical' | 'warning' | 'info';
+export type AlertCategory = 'bench' | 'margin' | 'project' | 'utilization';
+
+export interface Alert {
+  id: string;
+  severity: AlertSeverity;
+  category: AlertCategory;
+  title: string;
+  description: string;
+  /** Optional deep-link to the relevant page */
+  href?: string;
+  /** Optional numeric value driving the alert */
+  value?: number;
+}
+
+export interface AlertsData {
+  alerts: Alert[];
+  critical_count: number;
+  warning_count: number;
+  info_count: number;
+  total: number;
+}
+
 // ─── API Response Envelope ────────────────────────────────────────────────────
 
 export interface ApiSuccess<T> {
