@@ -38,12 +38,9 @@ function validateMagicBytes(buffer: Buffer): boolean {
   return xlsxMatch || xlsMatch;
 }
 
-// TODO: Phase 2 — Rate limiting: max 10 uploads/hour per IP using request headers
-
 export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse<UploadResult>>> {
   try {
     const supabase = await createClient();
-    // TODO: Phase 2 — Add Supabase Auth middleware here
 
     // 1. Parse form data
     const formData = await req.formData();

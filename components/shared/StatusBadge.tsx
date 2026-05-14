@@ -6,7 +6,7 @@ type BadgeStatus = DeploymentStatus | EmployeeStatusBadge;
 const BADGE_STYLES: Record<string, string> = {
   Active: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/25',
   Bench: 'bg-amber-500/15 text-amber-400 border-amber-500/25',
-  Completed: 'bg-slate-700/60 text-slate-400 border-slate-600/40',
+  Completed: 'bg-slate-700/60 text-slate-500 dark:text-slate-400 border-slate-600/40',
   Deployed: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/25',
   Inactive: 'bg-slate-700/60 text-slate-500 border-slate-600/40',
 };
@@ -25,7 +25,7 @@ interface StatusBadgeProps {
 }
 
 export function StatusBadge({ status, className = '' }: StatusBadgeProps) {
-  const style = BADGE_STYLES[status] ?? 'bg-slate-700/60 text-slate-400 border-slate-600/40';
+  const style = BADGE_STYLES[status] ?? 'bg-slate-700/60 text-slate-500 dark:text-slate-400 border-slate-600/40';
   const dot = BADGE_DOT[status] ?? 'bg-slate-500';
 
   return (

@@ -2,25 +2,27 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { Toaster } from 'sonner';
+import { ThemeProvider } from '@/components/theme-provider';
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' });
 
 export const metadata: Metadata = {
   title: {
-    default: 'DataHive — Centralized BI Platform',
-    template: '%s — DataHive',
+    default: 'OpsHive — Operations Intelligence Platform',
+    template: '%s — OpsHive',
   },
   description:
-    'Internal BI and chart management platform — upload Excel data, build charts, and get AI-powered insights.',
-  keywords: ['dashboard', 'BI', 'charts', 'data', 'excel', 'analytics'],
+    'Operations intelligence platform — upload Excel data, track workforce metrics, and get AI-powered insights for your services business.',
+  keywords: ['dashboard', 'operations', 'workforce', 'metrics', 'excel', 'analytics', 'BI'],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark">
-      <body className={inter.className}>
-        {children}
-        <Toaster
+    <html lang="en" suppressHydrationWarning>
+      <body className={inter.className} suppressHydrationWarning>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
+          {children}
+          <Toaster
           position="bottom-right"
           theme="dark"
           toastOptions={{
@@ -31,6 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             },
           }}
         />
+        </ThemeProvider>
       </body>
     </html>
   );

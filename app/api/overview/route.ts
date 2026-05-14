@@ -3,41 +3,60 @@ import { createClient } from '@/lib/supabase/server';
 import { logger } from '@/lib/utils/logger';
 import type { ApiResponse, OverviewData } from '@/types/app.types';
 
-// TODO: Phase 2 — Add Supabase Auth middleware here
-
 export async function GET(): Promise<NextResponse<ApiResponse<OverviewData>>> {
   try {
     const supabase = await createClient();
 
-    // Get the latest upload
-    const { data: latestUpload, error: uploadError } = await supabase
+    // Get the top 2 latest uploads
+    const { data: recentUploads, error: uploadError } = await supabase
       .from('uploads')
       .select('id, uploaded_at')
       .eq('status', 'ready')
       .order('uploaded_at', { ascending: false })
-      .limit(1)
-      .single();
+      .limit(2);
 
-    if (uploadError || !latestUpload) {
+    if (uploadError || !recentUploads || recentUploads.length === 0) {
       return NextResponse.json(
         { success: false, error: 'No data available. Please upload an Excel file first.', code: 'NO_DATA' },
         { status: 404 }
       );
     }
 
-    const { data: metrics, error: metricsError } = await supabase
+    const latestUpload = recentUploads[0];
+    const previousUpload = recentUploads.length > 1 ? recentUploads[1] : null;
+
+    const { data: metricsData, error: metricsError } = await supabase
       .from('company_metrics')
       .select('*')
-      .eq('upload_id', latestUpload.id)
-      .single();
+      .in('upload_id', recentUploads.map(u => u.id));
 
-    if (metricsError || !metrics) {
+    if (metricsError || !metricsData || metricsData.length === 0) {
       logger.error('[overview] Failed to fetch company_metrics', { error: metricsError });
       return NextResponse.json(
         { success: false, error: 'Failed to load overview metrics', code: 'METRICS_ERROR' },
         { status: 500 }
       );
     }
+
+    const metrics = metricsData.find(m => m.upload_id === latestUpload.id);
+    const prevMetrics = previousUpload ? metricsData.find(m => m.upload_id === previousUpload.id) : null;
+
+    if (!metrics) {
+      logger.error('[overview] Failed to fetch company_metrics', { error: metricsError });
+      return NextResponse.json(
+        { success: false, error: 'Failed to load overview metrics', code: 'METRICS_ERROR' },
+        { status: 500 }
+      );
+    }
+
+    const trends = prevMetrics ? {
+      revenue: prevMetrics.total_revenue ? ((metrics.total_revenue - prevMetrics.total_revenue) / prevMetrics.total_revenue) * 100 : 0,
+      profit: prevMetrics.total_profit ? ((metrics.total_profit - prevMetrics.total_profit) / Math.abs(prevMetrics.total_profit)) * 100 : 0,
+      employees: prevMetrics.total_employees ? ((metrics.total_employees - prevMetrics.total_employees) / prevMetrics.total_employees) * 100 : 0,
+      deployed: prevMetrics.deployed_count ? ((metrics.deployed_count - prevMetrics.deployed_count) / prevMetrics.deployed_count) * 100 : 0,
+      bench: prevMetrics.bench_count ? ((metrics.bench_count - prevMetrics.bench_count) / prevMetrics.bench_count) * 100 : 0,
+      gm: metrics.overall_gm_pct - prevMetrics.overall_gm_pct, // Absolute percentage point difference
+    } : undefined;
 
     return NextResponse.json({
       success: true,
@@ -52,6 +71,7 @@ export async function GET(): Promise<NextResponse<ApiResponse<OverviewData>>> {
         overall_gm_pct: metrics.overall_gm_pct ?? 0,
         calculated_at: metrics.calculated_at,
         last_uploaded_at: latestUpload.uploaded_at,
+        trends,
       },
     });
   } catch (error) {

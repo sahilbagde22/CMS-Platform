@@ -1,23 +1,26 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Users, Upload, Search } from 'lucide-react';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { EmptyState } from '@/components/shared/EmptyState';
+import { ExportDropdown } from '@/components/shared/ExportDropdown';
 import { formatCurrency } from '@/lib/utils/format-currency';
 import { formatPercentage } from '@/lib/utils/format-percentage';
+import { exportEmployees } from '@/lib/utils/export-excel';
+import { exportEmployeesPdf } from '@/lib/utils/export-pdf';
 import type { EmployeeListItem } from '@/types/app.types';
 
 function TableSkeleton() {
   return (
     <div className="animate-pulse space-y-0">
       {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} className="flex gap-4 px-5 py-3.5 border-b border-slate-800/40">
-          <div className="h-4 bg-slate-800 rounded w-24" />
-          <div className="h-4 bg-slate-800 rounded w-20" />
-          <div className="h-4 bg-slate-800 rounded w-28" />
-          <div className="h-4 bg-slate-800 rounded w-20 ml-auto" />
+        <div key={i} className="flex gap-4 px-5 py-3.5 border-b border-slate-200/40 dark:border-slate-800/40">
+          <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded w-24" />
+          <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded w-20" />
+          <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded w-28" />
+          <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded w-20 ml-auto" />
         </div>
       ))}
     </div>
@@ -87,6 +90,42 @@ export default function EmployeesPage() {
   const SortIndicator = ({ col }: { col: typeof sortCol }) =>
     sortCol === col ? <span className="ml-1">{sortAsc ? '↑' : '↓'}</span> : null;
 
+  const handleExportExcel = useCallback(() => {
+    exportEmployees(
+      filtered.map((e) => ({
+        emp_id: e.emp_id,
+        name: e.name,
+        department: e.department,
+        designation: e.designation,
+        status: e.status,
+        monthly_ctc: e.monthly_ctc,
+        annual_ctc: e.annual_ctc,
+        deployment_status: e.metrics?.deployment_status ?? null,
+        total_revenue: e.metrics?.total_revenue ?? null,
+        total_cost: e.metrics?.total_cost ?? null,
+        gross_margin: e.metrics?.gross_margin ?? null,
+        gross_margin_pct: e.metrics?.gross_margin_pct ?? null,
+        active_po_count: e.metrics?.active_po_count ?? null,
+        total_days_deployed: e.metrics?.total_days_deployed ?? null,
+      }))
+    );
+  }, [filtered]);
+
+  const handleExportPdf = useCallback(() => {
+    exportEmployeesPdf(
+      filtered.map((e) => ({
+        emp_id: e.emp_id,
+        name: e.name,
+        department: e.department,
+        designation: e.designation,
+        status: e.status,
+        total_revenue: e.metrics?.total_revenue ?? null,
+        gross_margin_pct: e.metrics?.gross_margin_pct ?? null,
+        deployment_status: e.metrics?.deployment_status ?? null,
+      }))
+    );
+  }, [filtered]);
+
   if (error) return (
     <div className="p-6">
       <div className="bg-rose-500/10 border border-rose-500/20 rounded-2xl p-4 text-rose-400 text-sm">{error}</div>
@@ -94,10 +133,18 @@ export default function EmployeesPage() {
   );
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-5">
+    <div className="p-6 max-w-7xl mx-auto space-y-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-white">Employees</h1>
-        <span className="text-slate-500 text-sm">{filtered.length} of {employees.length} employees</span>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Employees</h1>
+        <div className="flex items-center gap-3">
+          <span className="text-slate-500 text-sm">{filtered.length} of {employees.length} employees</span>
+          {!loading && filtered.length > 0 && (
+            <ExportDropdown
+              onExportExcel={handleExportExcel}
+              onExportPdf={handleExportPdf}
+            />
+          )}
+        </div>
       </div>
 
       {/* Filters */}
@@ -109,13 +156,13 @@ export default function EmployeesPage() {
             placeholder="Search name, ID, dept…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 pr-4 py-2 bg-slate-900 border border-slate-700/60 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-violet-500/50 w-64"
+            className="pl-9 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-300/60 dark:border-slate-700/60 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/50 w-64"
           />
         </div>
         <select
           value={filterDept}
           onChange={(e) => setFilterDept(e.target.value)}
-          className="px-3 py-2 bg-slate-900 border border-slate-700/60 rounded-xl text-sm text-white focus:outline-none focus:border-violet-500/50"
+          className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300/60 dark:border-slate-700/60 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:border-orange-500/50"
         >
           <option value="">All Departments</option>
           {departments.map((d) => <option key={d} value={d}>{d}</option>)}
@@ -123,7 +170,7 @@ export default function EmployeesPage() {
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
-          className="px-3 py-2 bg-slate-900 border border-slate-700/60 rounded-xl text-sm text-white focus:outline-none focus:border-violet-500/50"
+          className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300/60 dark:border-slate-700/60 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:border-orange-500/50"
         >
           <option value="">All Status</option>
           <option value="Active">Active</option>
@@ -132,11 +179,11 @@ export default function EmployeesPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-slate-900/50 border border-slate-800/60 rounded-2xl overflow-hidden">
+      <div className="bg-white/50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[700px]">
             <thead>
-              <tr className="border-b border-slate-800/60">
+              <tr className="border-b border-slate-200/60 dark:border-slate-800/60">
                 {[
                   { label: 'Name', col: 'name' as const },
                   { label: 'Department', col: null },
@@ -149,7 +196,7 @@ export default function EmployeesPage() {
                   <th
                     key={label}
                     onClick={() => col && toggleSort(col)}
-                    className={`text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3 ${col ? 'cursor-pointer hover:text-slate-300 select-none' : ''}`}
+                    className={`text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3 ${col ? 'cursor-pointer hover:text-slate-700 dark:text-slate-300 select-none' : ''}`}
                   >
                     {label}{col && <SortIndicator col={col} />}
                   </th>
@@ -163,16 +210,16 @@ export default function EmployeesPage() {
                     <tr
                       key={emp.id}
                       onClick={() => router.push(`/employees/${emp.emp_id}`)}
-                      className="hover:bg-slate-800/30 cursor-pointer transition-colors group"
+                      className="hover:bg-slate-100/30 dark:bg-slate-800/30 cursor-pointer transition-colors group"
                     >
                       <td className="px-5 py-3.5">
-                        <p className="text-sm font-medium text-white group-hover:text-violet-300 transition-colors">{emp.name}</p>
+                        <p className="text-sm font-medium text-slate-900 dark:text-white group-hover:text-orange-300 transition-colors">{emp.name}</p>
                         <p className="text-xs text-slate-500">{emp.emp_id}</p>
                       </td>
-                      <td className="px-5 py-3.5 text-sm text-slate-400">{emp.department}</td>
-                      <td className="px-5 py-3.5 text-sm text-slate-400">{emp.designation ?? '—'}</td>
+                      <td className="px-5 py-3.5 text-sm text-slate-500 dark:text-slate-400">{emp.department}</td>
+                      <td className="px-5 py-3.5 text-sm text-slate-500 dark:text-slate-400">{emp.designation ?? '—'}</td>
                       <td className="px-5 py-3.5"><StatusBadge status={emp.status} /></td>
-                      <td className="px-5 py-3.5 text-sm text-slate-300 font-medium">{formatCurrency(emp.metrics?.total_revenue)}</td>
+                      <td className="px-5 py-3.5 text-sm text-slate-700 dark:text-slate-300 font-medium">{formatCurrency(emp.metrics?.total_revenue)}</td>
                       <td className="px-5 py-3.5 text-sm font-medium">
                         <span className={`${(emp.metrics?.gross_margin_pct ?? 0) >= 30 ? 'text-emerald-400' : (emp.metrics?.gross_margin_pct ?? 0) >= 0 ? 'text-amber-400' : 'text-rose-400'}`}>
                           {formatPercentage(emp.metrics?.gross_margin_pct)}

@@ -14,6 +14,8 @@ import {
   DEPLOYMENT_LOG_COLUMNS,
 } from '@/lib/constants/columns';
 import { SHEET_NAMES } from '@/lib/constants/sheets';
+import { UploadHistory } from '@/components/dashboard/UploadHistory';
+import { toast } from 'sonner';
 
 type UploadState = 'idle' | 'uploading' | 'mapping' | 'processing' | 'success' | 'error';
 
@@ -47,6 +49,7 @@ export default function UploadPage() {
   const [result, setResult] = useState<UploadResult | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const handlePreview = async (f: File) => {
     setState('uploading');
@@ -108,6 +111,10 @@ export default function UploadPage() {
 
       setResult(json.data);
       setState('success');
+      setRefreshKey(prev => prev + 1);
+      toast.success('Data processed successfully', { 
+        description: 'Your operations dashboard has been updated with the latest metrics.',
+      });
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : 'Unknown error');
       setState('error');
@@ -150,20 +157,20 @@ export default function UploadPage() {
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-6">
+    <div className="p-6 max-w-4xl mx-auto space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-white">Upload Excel File</h1>
-        <p className="text-slate-400 text-sm mt-1">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Upload Excel File</h1>
+        <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
           Upload a single .xlsx file containing all 3 required sheets.
         </p>
       </div>
 
       {/* Required Sheets Info */}
-      <div className="bg-violet-500/10 border border-violet-500/20 rounded-2xl p-4">
-        <p className="text-xs font-medium text-violet-300 mb-2">Required sheets in your Excel file:</p>
+      <div className="bg-orange-500/10 border border-orange-500/20 rounded-2xl p-4">
+        <p className="text-xs font-medium text-orange-300 mb-2">Required sheets in your Excel file:</p>
         <div className="flex flex-wrap gap-2">
           {REQUIRED_SHEETS.map((s) => (
-            <span key={s} className="px-2.5 py-1 bg-violet-500/15 border border-violet-500/20 rounded-lg text-xs font-mono text-violet-300">
+            <span key={s} className="px-2.5 py-1 bg-orange-500/15 border border-orange-500/20 rounded-lg text-xs font-mono text-orange-300">
               {s}
             </span>
           ))}
@@ -177,14 +184,14 @@ export default function UploadPage() {
           className={`
             relative border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-all duration-200
             ${isDragActive
-              ? 'border-violet-400 bg-violet-500/10'
-              : 'border-slate-700 hover:border-violet-500/50 hover:bg-slate-900/40'
+              ? 'border-orange-400 bg-orange-500/10'
+              : 'border-slate-300 dark:border-slate-700 hover:border-orange-500/50 hover:bg-white/40 dark:bg-slate-900/40'
             }
           `}
         >
           <input {...getInputProps()} />
           <FileSpreadsheet className="w-10 h-10 text-slate-500 mx-auto mb-4" />
-          <p className="text-white font-medium mb-1">
+          <p className="text-slate-900 dark:text-white font-medium mb-1">
             {isDragActive ? 'Drop your Excel file here' : 'Drag & drop your Excel file'}
           </p>
           <p className="text-slate-500 text-sm mb-4">or click to browse</p>
@@ -194,17 +201,17 @@ export default function UploadPage() {
 
       {/* Uploading/Processing State */}
       {(state === 'uploading' || state === 'processing') && (
-        <div className="border border-slate-800/60 bg-slate-900/50 rounded-2xl p-8 text-center space-y-4">
-          <Loader2 className="w-8 h-8 text-violet-400 animate-spin mx-auto" />
+        <div className="border border-slate-200/60 dark:border-slate-800/60 bg-white/50 dark:bg-slate-900/50 rounded-2xl p-8 text-center space-y-4">
+          <Loader2 className="w-8 h-8 text-orange-400 animate-spin mx-auto" />
           <div>
-            <p className="text-white font-medium">{file?.name}</p>
-            <p className="text-slate-400 text-sm mt-1">
+            <p className="text-slate-900 dark:text-white font-medium">{file?.name}</p>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
               {state === 'uploading' ? 'Analyzing your Excel file...' : 'Processing data and calculating metrics...'}
             </p>
           </div>
-          <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden mx-auto max-w-xs">
+          <div className="h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mx-auto max-w-xs">
             <div
-              className="h-full bg-gradient-to-r from-violet-500 to-cyan-500 rounded-full transition-all duration-500"
+              className="h-full bg-gradient-to-r from-orange-500 to-cyan-500 rounded-full transition-all duration-500"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -214,12 +221,12 @@ export default function UploadPage() {
       {/* Mapping State */}
       {state === 'mapping' && (
         <div className="space-y-6">
-          <div className="border border-violet-500/20 bg-violet-500/10 rounded-2xl p-6">
+          <div className="border border-orange-500/20 bg-orange-500/10 rounded-2xl p-6">
             <div className="flex items-center gap-3 mb-2">
-              <TableProperties className="w-6 h-6 text-violet-400 shrink-0" />
-              <p className="text-white font-semibold">Review Column Mappings</p>
+              <TableProperties className="w-6 h-6 text-orange-400 shrink-0" />
+              <p className="text-slate-900 dark:text-white font-semibold">Review Column Mappings</p>
             </div>
-            <p className="text-violet-300 text-sm pl-9">
+            <p className="text-orange-300 text-sm pl-9">
               We&apos;ve automatically matched your Excel headers to the database columns. 
               Please verify them below before saving.
             </p>
@@ -232,12 +239,12 @@ export default function UploadPage() {
               const availableColumns = SHEET_COLUMNS_MAP[sheet.sheetName] || [];
               
               return (
-                <div key={sheet.sheetName} className="bg-slate-900/50 border border-slate-800/60 rounded-2xl overflow-hidden">
-                  <div className="px-5 py-3 border-b border-slate-800/60 bg-slate-800/20">
-                    <h3 className="text-sm font-semibold text-white font-mono">{sheet.sheetName}</h3>
+                <div key={sheet.sheetName} className="bg-white/50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl overflow-hidden">
+                  <div className="px-5 py-3 border-b border-slate-200/60 dark:border-slate-800/60 bg-slate-100/20 dark:bg-slate-800/20">
+                    <h3 className="text-sm font-semibold text-slate-900 dark:text-white font-mono">{sheet.sheetName}</h3>
                   </div>
                   <div className="p-5">
-                    <div className="grid grid-cols-2 gap-4 text-xs font-medium text-slate-400 mb-3 px-2">
+                    <div className="grid grid-cols-2 gap-4 text-xs font-medium text-slate-500 dark:text-slate-400 mb-3 px-2">
                       <div>Your Excel Header</div>
                       <div>Maps to Database Column</div>
                     </div>
@@ -245,17 +252,17 @@ export default function UploadPage() {
                       {sheet.headers.map((header) => {
                         const currentValue = mappings[sheet.sheetName]?.[header] ?? 'ignore';
                         return (
-                          <div key={header} className="grid grid-cols-2 gap-4 items-center bg-slate-800/30 p-2 rounded-lg border border-slate-700/50">
-                            <div className="text-sm text-slate-300 truncate font-mono px-2" title={header}>
+                          <div key={header} className="grid grid-cols-2 gap-4 items-center bg-slate-100/30 dark:bg-slate-800/30 p-2 rounded-lg border border-slate-300/50 dark:border-slate-700/50">
+                            <div className="text-sm text-slate-700 dark:text-slate-300 truncate font-mono px-2" title={header}>
                               {header}
                             </div>
                             <select
                               value={currentValue}
                               onChange={(e) => handleMappingChange(sheet.sheetName, header, e.target.value)}
                               className={`
-                                w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-sm outline-none transition-colors
+                                w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-1.5 text-sm outline-none transition-colors
                                 ${currentValue === 'ignore' ? 'text-slate-500' : 'text-emerald-400 border-emerald-500/30 bg-emerald-500/5'}
-                                focus:border-violet-500 focus:ring-1 focus:ring-violet-500
+                                focus:border-orange-500 focus:ring-1 focus:ring-orange-500
                               `}
                             >
                               <option value="ignore">-- Ignore Column --</option>
@@ -273,16 +280,16 @@ export default function UploadPage() {
             })}
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-slate-800/60">
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-200/60 dark:border-slate-800/60">
             <button
               onClick={reset}
-              className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium rounded-xl transition-all"
+              className="px-5 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-medium rounded-xl transition-all"
             >
               Cancel
             </button>
             <button
               onClick={handleProcess}
-              className="flex items-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium rounded-xl transition-all shadow-lg shadow-violet-500/20"
+              className="flex items-center gap-2 px-5 py-2.5 bg-orange-600 hover:bg-orange-500 text-slate-900 dark:text-white text-sm font-medium rounded-xl transition-all shadow-lg shadow-orange-500/20"
             >
               Confirm & Process Data <ArrowRight className="w-4 h-4" />
             </button>
@@ -297,7 +304,7 @@ export default function UploadPage() {
             <div className="flex items-center gap-3 mb-3">
               <CheckCircle className="w-6 h-6 text-emerald-400 shrink-0" />
               <div>
-                <p className="text-white font-semibold">Upload complete!</p>
+                <p className="text-slate-900 dark:text-white font-semibold">Upload complete!</p>
                 <p className="text-emerald-400 text-sm">{file?.name}</p>
               </div>
             </div>
@@ -307,13 +314,13 @@ export default function UploadPage() {
           <div className="flex gap-3">
             <Link
               href="/overview"
-              className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium rounded-xl transition-all"
+              className="flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-500 text-slate-900 dark:text-white text-sm font-medium rounded-xl transition-all"
             >
               View Dashboard <ArrowRight className="w-4 h-4" />
             </Link>
             <button
               onClick={reset}
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium rounded-xl transition-all"
+              className="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-medium rounded-xl transition-all"
             >
               Upload Another
             </button>
@@ -327,18 +334,21 @@ export default function UploadPage() {
           <div className="border border-rose-500/20 bg-rose-500/10 rounded-2xl p-6">
             <div className="flex items-center gap-3 mb-2">
               <XCircle className="w-6 h-6 text-rose-400 shrink-0" />
-              <p className="text-white font-semibold">Upload failed</p>
+              <p className="text-slate-900 dark:text-white font-semibold">Upload failed</p>
             </div>
             <p className="text-rose-400 text-sm pl-9">{errorMsg}</p>
           </div>
           <button
             onClick={reset}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium rounded-xl transition-all"
+            className="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-medium rounded-xl transition-all"
           >
             <Upload className="w-4 h-4" /> Try Again
           </button>
         </div>
       )}
+
+      {/* Upload History */}
+      <UploadHistory refreshTrigger={refreshKey} />
     </div>
   );
 }

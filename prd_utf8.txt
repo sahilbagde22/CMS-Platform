@@ -1,0 +1,20 @@
+﻿<USER_REQUEST>
+Product Requirements Document (PRD)
+Service Operations & Resource Management Dashboard
+________________________________________
+1. Project Overview
+The purpose of this project is to build an internal web-based operations dashboard for a service-oriented company currently managing operations through multiple Excel sheets.
+The system will centralize employee deployment, project allocation, revenue tracking, utilization monitoring, and operational analytics into a single interactive dashboard application.
+The platform will reduce manual calculations, improve operational visibility, and support business decision-making through automated metrics and reporting.
+________________________________________
+2. Problem Statement
+Currently, the organization manages:
+â—	Employee deployment
+â—	PO/project allocation
+â—	Revenue calculations
+â—	Salary mapping
+â—	Department summaries
+â—	Gross margin tracking
+using interconnected Excel sheets.
+This creates several issues:
+<truncated 7766 bytes>

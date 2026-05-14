@@ -171,6 +171,14 @@ export interface CompanyMetrics {
 /** Overview API response */
 export interface OverviewData extends CompanyMetrics {
   last_uploaded_at: string | null;
+  trends?: {
+    revenue: number;
+    profit: number;
+    employees: number;
+    deployed: number;
+    gm: number;
+    bench: number;
+  };
 }
 
 /** Employee list item (joined employee + metrics) */

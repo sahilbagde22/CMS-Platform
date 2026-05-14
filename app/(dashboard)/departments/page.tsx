@@ -1,15 +1,18 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { Building2, Upload } from 'lucide-react';
 import { EmptyState } from '@/components/shared/EmptyState';
+import { ExportDropdown } from '@/components/shared/ExportDropdown';
 import { formatCurrency } from '@/lib/utils/format-currency';
 import { formatPercentage } from '@/lib/utils/format-percentage';
+import { exportDepartments } from '@/lib/utils/export-excel';
+import { exportDepartmentsPdf } from '@/lib/utils/export-pdf';
 import type { DepartmentListItem } from '@/types/app.types';
 
 function SkeletonCard() {
-  return <div className="h-44 bg-slate-900/50 border border-slate-800/60 rounded-2xl animate-pulse" />;
+  return <div className="h-44 bg-white/50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl animate-pulse" />;
 }
 
 export default function DepartmentsPage() {
@@ -33,6 +36,37 @@ export default function DepartmentsPage() {
     load();
   }, []);
 
+  const handleExportExcel = useCallback(() => {
+    exportDepartments(
+      departments.map((d) => ({
+        department: d.department,
+        headcount: d.headcount,
+        deployed_count: d.deployed_count,
+        bench_count: d.bench_count,
+        deployment_pct: d.deployment_pct,
+        total_revenue: d.total_revenue,
+        total_cost: d.total_cost,
+        total_profit: d.total_profit,
+        gross_margin_pct: d.gross_margin_pct,
+      }))
+    );
+  }, [departments]);
+
+  const handleExportPdf = useCallback(() => {
+    exportDepartmentsPdf(
+      departments.map((d) => ({
+        department: d.department,
+        headcount: d.headcount,
+        deployed_count: d.deployed_count,
+        bench_count: d.bench_count,
+        deployment_pct: d.deployment_pct,
+        total_revenue: d.total_revenue,
+        total_profit: d.total_profit,
+        gross_margin_pct: d.gross_margin_pct,
+      }))
+    );
+  }, [departments]);
+
   if (error) return (
     <div className="p-6">
       <div className="bg-rose-500/10 border border-rose-500/20 rounded-2xl p-4 text-rose-400 text-sm">{error}</div>
@@ -40,11 +74,19 @@ export default function DepartmentsPage() {
   );
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-5">
-      <h1 className="text-2xl font-bold text-white">Departments</h1>
+    <div className="p-6 max-w-7xl mx-auto space-y-8">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Departments</h1>
+        {!loading && departments.length > 0 && (
+          <ExportDropdown
+            onExportExcel={handleExportExcel}
+            onExportPdf={handleExportPdf}
+          />
+        )}
+      </div>
 
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
           {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
         </div>
       ) : departments.length === 0 ? (
@@ -56,7 +98,7 @@ export default function DepartmentsPage() {
           ctaHref="/upload"
         />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
           {departments.map((dept) => {
             const gmColor =
               dept.gross_margin_pct >= 30
@@ -69,16 +111,16 @@ export default function DepartmentsPage() {
               <Link
                 key={dept.department}
                 href={`/departments/${encodeURIComponent(dept.department)}`}
-                className="block p-5 bg-slate-900/50 border border-slate-800/60 rounded-2xl hover:border-violet-500/30 hover:bg-slate-900/80 transition-all group"
+                className="block p-6 bg-white/50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl hover:border-orange-500/30 hover:bg-white/80 dark:bg-slate-900/80 transition-all group hover:scale-[1.01] hover:shadow-lg hover:shadow-orange-500/10"
               >
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h2 className="text-base font-semibold text-white group-hover:text-violet-300 transition-colors">
+                    <h2 className="text-base font-semibold text-slate-900 dark:text-white group-hover:text-orange-300 transition-colors">
                       {dept.department}
                     </h2>
                     <p className="text-xs text-slate-500 mt-0.5">{dept.headcount} employees</p>
                   </div>
-                  <Building2 className="w-5 h-5 text-slate-600 group-hover:text-violet-500 transition-colors" />
+                  <Building2 className="w-5 h-5 text-slate-600 group-hover:text-orange-500 transition-colors" />
                 </div>
 
                 {/* Deployed / Bench bar */}
@@ -87,7 +129,7 @@ export default function DepartmentsPage() {
                     <span>Deployed: {dept.deployed_count}</span>
                     <span>Bench: {dept.bench_count}</span>
                   </div>
-                  <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
+                  <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full transition-all"
                       style={{ width: `${Math.min(dept.deployment_pct, 100)}%` }}
@@ -96,10 +138,10 @@ export default function DepartmentsPage() {
                   <p className="text-xs text-slate-500 mt-1 text-right">{formatPercentage(dept.deployment_pct)} deployed</p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-800/60">
+                <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-200/60 dark:border-slate-800/60">
                   <div>
                     <p className="text-xs text-slate-500">Revenue</p>
-                    <p className="text-sm font-semibold text-white">{formatCurrency(dept.total_revenue)}</p>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">{formatCurrency(dept.total_revenue)}</p>
                   </div>
                   <div>
                     <p className="text-xs text-slate-500">GM%</p>

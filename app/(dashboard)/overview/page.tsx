@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   Users, TrendingUp, TrendingDown, DollarSign,
   BarChart3, Clock, Upload
@@ -9,9 +9,13 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { MetricCard } from '@/components/shared/MetricCard';
 import { EmptyState } from '@/components/shared/EmptyState';
+import { ExportDropdown } from '@/components/shared/ExportDropdown';
 import { AiInsights } from '@/components/dashboard/AiInsights';
 import { AlertsPanel } from '@/components/dashboard/AlertsPanel';
+import { TrendCharts } from '@/components/dashboard/TrendCharts';
 import { formatCurrency } from '@/lib/utils/format-currency';
+import { exportOverview } from '@/lib/utils/export-excel';
+import { exportOverviewPdf } from '@/lib/utils/export-pdf';
 
 import { formatPercentage } from '@/lib/utils/format-percentage';
 import type { OverviewData } from '@/types/app.types';
@@ -21,10 +25,10 @@ const ReactECharts = dynamic(() => import('echarts-for-react'), { ssr: false });
 // Skeleton shimmer
 function SkeletonCard() {
   return (
-    <div className="p-5 bg-slate-900/50 border border-slate-800/60 rounded-2xl animate-pulse">
-      <div className="w-9 h-9 rounded-xl bg-slate-800 mb-3" />
-      <div className="h-7 w-24 bg-slate-800 rounded mb-2" />
-      <div className="h-3 w-16 bg-slate-800 rounded" />
+    <div className="p-5 bg-white/50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl animate-pulse">
+      <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 mb-3" />
+      <div className="h-7 w-24 bg-slate-100 dark:bg-slate-800 rounded mb-2" />
+      <div className="h-3 w-16 bg-slate-100 dark:bg-slate-800 rounded" />
     </div>
   );
 }
@@ -32,7 +36,7 @@ function SkeletonCard() {
 function ChartSkeleton({ height = 280 }: { height?: number }) {
   return (
     <div
-      className="bg-slate-900/50 border border-slate-800/60 rounded-2xl animate-pulse"
+      className="bg-white/50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl animate-pulse"
       style={{ height }}
     />
   );
@@ -46,6 +50,9 @@ export default function OverviewPage() {
     bench_count: number;
     headcount: number;
     total_revenue: number;
+    total_cost: number;
+    total_profit: number;
+    deployment_pct: number;
     gross_margin_pct: number;
   }[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,14 +89,69 @@ export default function OverviewPage() {
     fetchData();
   }, []);
 
+  const handleExportExcel = useCallback(() => {
+    if (!data) return;
+    exportOverview(
+      {
+        total_employees: data.total_employees,
+        deployed_count: data.deployed_count,
+        bench_count: data.bench_count,
+        overall_deploy_pct: data.overall_deploy_pct,
+        total_revenue: data.total_revenue,
+        total_cost: data.total_cost,
+        total_profit: data.total_profit,
+        overall_gm_pct: data.overall_gm_pct,
+        last_uploaded_at: data.last_uploaded_at,
+      },
+      deptData.map((d) => ({
+        department: d.department,
+        headcount: d.headcount,
+        deployed_count: d.deployed_count,
+        bench_count: d.bench_count,
+        deployment_pct: d.deployment_pct ?? 0,
+        total_revenue: d.total_revenue,
+        total_cost: d.total_cost ?? 0,
+        total_profit: d.total_profit ?? 0,
+        gross_margin_pct: d.gross_margin_pct,
+      }))
+    );
+  }, [data, deptData]);
+
+  const handleExportPdf = useCallback(() => {
+    if (!data) return;
+    exportOverviewPdf(
+      {
+        total_employees: data.total_employees,
+        deployed_count: data.deployed_count,
+        bench_count: data.bench_count,
+        overall_deploy_pct: data.overall_deploy_pct,
+        total_revenue: data.total_revenue,
+        total_cost: data.total_cost,
+        total_profit: data.total_profit,
+        overall_gm_pct: data.overall_gm_pct,
+        last_uploaded_at: data.last_uploaded_at,
+      },
+      deptData.map((d) => ({
+        department: d.department,
+        headcount: d.headcount,
+        deployed_count: d.deployed_count,
+        bench_count: d.bench_count,
+        deployment_pct: d.deployment_pct ?? 0,
+        total_revenue: d.total_revenue,
+        total_profit: d.total_profit ?? 0,
+        gross_margin_pct: d.gross_margin_pct,
+      }))
+    );
+  }, [data, deptData]);
+
   if (loading) {
     return (
-      <div className="p-6 max-w-7xl mx-auto space-y-6">
-        <div className="h-8 w-48 bg-slate-800 rounded animate-pulse" />
-        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
+      <div className="p-6 max-w-7xl mx-auto space-y-8">
+        <div className="h-8 w-48 bg-slate-100 dark:bg-slate-800 rounded animate-pulse" />
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-6">
           {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <ChartSkeleton />
           <ChartSkeleton />
           <ChartSkeleton />
@@ -210,25 +272,31 @@ export default function OverviewPage() {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="p-6 max-w-7xl mx-auto space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Company Overview</h1>
-          <p className="text-slate-400 text-sm mt-0.5">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Company Overview</h1>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-0.5">
             Last updated:{' '}
             {data.last_uploaded_at
               ? new Date(data.last_uploaded_at).toLocaleString('en-IN')
               : '—'}
           </p>
         </div>
-        <Link
-          href="/upload"
-          className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium rounded-xl transition-all shadow-lg shadow-violet-500/20"
-        >
-          <Upload className="w-4 h-4" />
-          Upload New
-        </Link>
+        <div className="flex items-center gap-3">
+          <ExportDropdown
+            onExportExcel={handleExportExcel}
+            onExportPdf={handleExportPdf}
+          />
+          <Link
+            href="/upload"
+            className="flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-500 text-slate-900 dark:text-white text-sm font-medium rounded-xl transition-all shadow-lg shadow-orange-500/20"
+          >
+            <Upload className="w-4 h-4" />
+            Upload New
+          </Link>
+        </div>
       </div>
 
       {/* AI Executive Summary */}
@@ -237,13 +305,17 @@ export default function OverviewPage() {
       {/* Smart Alerts */}
       <AlertsPanel />
 
+      {/* Historical Trend Charts */}
+      <TrendCharts />
+
       {/* KPI Cards — 6 across on desktop */}
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-6">
         <MetricCard
           label="Total Employees"
           value={data.total_employees}
           icon={Users}
-          color="violet"
+          color="orange"
+          trend={data.trends?.employees}
         />
         <MetricCard
           label="Deployed"
@@ -251,44 +323,49 @@ export default function OverviewPage() {
           icon={TrendingUp}
           color="emerald"
           subtitle={formatPercentage(data.overall_deploy_pct) + ' rate'}
+          trend={data.trends?.deployed}
         />
         <MetricCard
           label="On Bench"
           value={data.bench_count}
           icon={Clock}
           color="amber"
+          trend={data.trends?.bench ? -data.trends.bench : undefined} // Negative trend is good if bench goes down
         />
         <MetricCard
           label="Total Revenue"
           value={formatCurrency(data.total_revenue)}
           icon={DollarSign}
           color="cyan"
+          trend={data.trends?.revenue}
         />
         <MetricCard
           label="Total Profit"
           value={formatCurrency(data.total_profit)}
           icon={data.total_profit >= 0 ? TrendingUp : TrendingDown}
           color={data.total_profit >= 0 ? 'emerald' : 'rose'}
+          trend={data.trends?.profit}
         />
         <MetricCard
           label="Overall GM%"
           value={formatPercentage(data.overall_gm_pct)}
           icon={BarChart3}
           color={data.overall_gm_pct >= 30 ? 'emerald' : 'amber'}
+          trend={data.trends?.gm}
         />
       </div>
 
       {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Deployment Pie */}
-        <div className="bg-slate-900/50 border border-slate-800/60 rounded-2xl p-5">
-          <h2 className="text-sm font-semibold text-white mb-4">Deployment Status</h2>
+        <div className="bg-white/50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5">
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-white mb-4">Deployment Status</h2>
           <ReactECharts option={deploymentPieOption} style={{ height: 220 }} />
         </div>
 
         {/* Revenue by Dept */}
-        <div className="bg-slate-900/50 border border-slate-800/60 rounded-2xl p-5">
-          <h2 className="text-sm font-semibold text-white mb-4">Revenue by Department</h2>
+        <div className="bg-white/50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5">
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-white mb-4">Revenue by Department</h2>
           {deptData.length > 0
             ? <ReactECharts option={revenueBarOption} style={{ height: 220 }} />
             : <div className="h-[220px] flex items-center justify-center text-slate-600 text-sm">No department data</div>
@@ -296,8 +373,8 @@ export default function OverviewPage() {
         </div>
 
         {/* GM% by Dept */}
-        <div className="bg-slate-900/50 border border-slate-800/60 rounded-2xl p-5">
-          <h2 className="text-sm font-semibold text-white mb-4">GM% by Department</h2>
+        <div className="bg-white/50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5">
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-white mb-4">GM% by Department</h2>
           {deptData.length > 0
             ? <ReactECharts option={gmBarOption} style={{ height: 220 }} />
             : <div className="h-[220px] flex items-center justify-center text-slate-600 text-sm">No department data</div>

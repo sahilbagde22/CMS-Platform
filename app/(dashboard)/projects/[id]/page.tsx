@@ -34,11 +34,11 @@ export default function ProjectDetailPage() {
 
   if (loading) return (
     <div className="p-6 max-w-4xl mx-auto space-y-6 animate-pulse">
-      <div className="h-7 w-56 bg-slate-800 rounded" />
+      <div className="h-7 w-56 bg-slate-100 dark:bg-slate-800 rounded" />
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-24 bg-slate-900/50 border border-slate-800/60 rounded-2xl" />)}
+        {Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-24 bg-white/50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl" />)}
       </div>
-      <div className="h-64 bg-slate-900/50 border border-slate-800/60 rounded-2xl" />
+      <div className="h-64 bg-white/50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl" />
     </div>
   );
 
@@ -53,16 +53,16 @@ export default function ProjectDetailPage() {
 
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6">
-      <button onClick={() => router.back()} className="flex items-center gap-2 text-slate-400 hover:text-white text-sm transition-colors">
+      <button onClick={() => router.back()} className="flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white text-sm transition-colors">
         <ArrowLeft className="w-4 h-4" /> Back to Projects
       </button>
 
       {/* Header */}
-      <div className="p-5 bg-slate-900/50 border border-slate-800/60 rounded-2xl">
+      <div className="p-5 bg-white/50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl">
         <div className="flex items-start gap-3 flex-wrap">
           <div className="flex-1 min-w-0">
-            <h1 className="text-xl font-bold text-white">{proj.project_name ?? proj.po_number}</h1>
-            <p className="text-slate-400 text-sm mt-0.5">PO: {proj.po_number} · {proj.client ?? 'Unknown client'} · {proj.vertical ?? '—'}</p>
+            <h1 className="text-xl font-bold text-slate-900 dark:text-white">{proj.project_name ?? proj.po_number}</h1>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-0.5">PO: {proj.po_number} · {proj.client ?? 'Unknown client'} · {proj.vertical ?? '—'}</p>
             <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-2">
               <Calendar className="w-3.5 h-3.5" />
               {proj.start_date ?? '—'} → {proj.end_date ?? 'Ongoing'}
@@ -70,7 +70,7 @@ export default function ProjectDetailPage() {
           </div>
           <div className="text-right shrink-0">
             <p className="text-xs text-slate-500">PO Value</p>
-            <p className="text-xl font-bold text-white">{formatCurrency(proj.po_value)}</p>
+            <p className="text-xl font-bold text-slate-900 dark:text-white">{formatCurrency(proj.po_value)}</p>
             {proj.gm_target_pct && <p className="text-xs text-slate-500">Target GM: {formatPercentage(proj.gm_target_pct)}</p>}
           </div>
         </div>
@@ -85,9 +85,9 @@ export default function ProjectDetailPage() {
       </div>
 
       {/* Deployed Employees */}
-      <div className="bg-slate-900/50 border border-slate-800/60 rounded-2xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-slate-800/60">
-          <h2 className="text-sm font-semibold text-white">Deployed Employees</h2>
+      <div className="bg-white/50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl overflow-hidden">
+        <div className="px-5 py-4 border-b border-slate-200/60 dark:border-slate-800/60">
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Deployed Employees</h2>
         </div>
         {deployments.length === 0 ? (
           <div className="px-5 py-10 text-center text-slate-500 text-sm">No deployments for this project.</div>
@@ -95,7 +95,7 @@ export default function ProjectDetailPage() {
           <div className="overflow-x-auto">
             <table className="w-full min-w-[550px]">
               <thead>
-                <tr className="border-b border-slate-800/60">
+                <tr className="border-b border-slate-200/60 dark:border-slate-800/60">
                   {['Employee', 'Department', 'Period', 'Revenue', 'Status'].map((h) => (
                     <th key={h} className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3">{h}</th>
                   ))}
@@ -106,17 +106,17 @@ export default function ProjectDetailPage() {
                   <tr
                     key={d.id}
                     onClick={() => router.push(`/employees/${d.emp_id}`)}
-                    className="hover:bg-slate-800/30 cursor-pointer transition-colors"
+                    className="hover:bg-slate-100/30 dark:bg-slate-800/30 cursor-pointer transition-colors"
                   >
                     <td className="px-5 py-3.5">
-                      <p className="text-sm font-medium text-white">{d.employee_name}</p>
+                      <p className="text-sm font-medium text-slate-900 dark:text-white">{d.employee_name}</p>
                       <p className="text-xs text-slate-500">{d.designation ?? d.emp_id}</p>
                     </td>
-                    <td className="px-5 py-3.5 text-sm text-slate-400">{d.department}</td>
-                    <td className="px-5 py-3.5 text-xs text-slate-400">
+                    <td className="px-5 py-3.5 text-sm text-slate-500 dark:text-slate-400">{d.department}</td>
+                    <td className="px-5 py-3.5 text-xs text-slate-500 dark:text-slate-400">
                       {d.deployment_start ?? '—'} → {d.deployment_end ?? 'Ongoing'}
                     </td>
-                    <td className="px-5 py-3.5 text-sm text-slate-300">{formatCurrency(d.revenue)}</td>
+                    <td className="px-5 py-3.5 text-sm text-slate-700 dark:text-slate-300">{formatCurrency(d.revenue)}</td>
                     <td className="px-5 py-3.5"><StatusBadge status={d.status} /></td>
                   </tr>
                 ))}

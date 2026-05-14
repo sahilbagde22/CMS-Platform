@@ -9,7 +9,6 @@ const ALLOWED_SORT_COLUMNS = new Set([
   'total_revenue', 'gross_margin_pct', 'deployment_status',
 ]);
 
-// TODO: Phase 2 — Add Supabase Auth middleware here
 
 export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse<EmployeeListItem[]>>> {
   try {

@@ -10,7 +10,7 @@ import { formatPercentage } from '@/lib/utils/format-percentage';
 import type { EmployeeDetail } from '@/types/app.types';
 
 function SkeletonBlock({ h = 'h-4', w = 'w-32' }: { h?: string; w?: string }) {
-  return <div className={`${h} ${w} bg-slate-800 rounded animate-pulse`} />;
+  return <div className={`${h} ${w} bg-slate-100 dark:bg-slate-800 rounded animate-pulse`} />;
 }
 
 export default function EmployeeDetailPage() {
@@ -40,9 +40,9 @@ export default function EmployeeDetailPage() {
     <div className="p-6 max-w-4xl mx-auto space-y-6">
       <SkeletonBlock h="h-7" w="w-48" />
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-24 bg-slate-900/50 border border-slate-800/60 rounded-2xl animate-pulse" />)}
+        {Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-24 bg-white/50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl animate-pulse" />)}
       </div>
-      <div className="h-48 bg-slate-900/50 border border-slate-800/60 rounded-2xl animate-pulse" />
+      <div className="h-48 bg-white/50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl animate-pulse" />
     </div>
   );
 
@@ -61,28 +61,28 @@ export default function EmployeeDetailPage() {
       {/* Back */}
       <button
         onClick={() => router.back()}
-        className="flex items-center gap-2 text-slate-400 hover:text-white text-sm transition-colors"
+        className="flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white text-sm transition-colors"
       >
         <ArrowLeft className="w-4 h-4" /> Back to Employees
       </button>
 
       {/* Profile Header */}
-      <div className="flex items-start gap-4 p-5 bg-slate-900/50 border border-slate-800/60 rounded-2xl">
-        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center text-white font-bold text-xl shrink-0">
+      <div className="flex items-start gap-4 p-5 bg-white/50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl">
+        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500 to-cyan-500 flex items-center justify-center text-slate-900 dark:text-white font-bold text-xl shrink-0">
           {emp.name[0]?.toUpperCase()}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="text-xl font-bold text-white">{emp.name}</h1>
+            <h1 className="text-xl font-bold text-slate-900 dark:text-white">{emp.name}</h1>
             <StatusBadge status={emp.status} />
             {metrics && <StatusBadge status={metrics.deployment_status} />}
           </div>
-          <p className="text-slate-400 text-sm mt-1">{emp.designation ?? 'No designation'} · {emp.department}</p>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{emp.designation ?? 'No designation'} · {emp.department}</p>
           <p className="text-slate-500 text-xs mt-0.5">ID: {emp.emp_id}</p>
         </div>
         <div className="text-right hidden sm:block">
           <p className="text-xs text-slate-500">Monthly CTC</p>
-          <p className="text-lg font-bold text-white">{formatCurrency(emp.monthly_ctc)}</p>
+          <p className="text-lg font-bold text-slate-900 dark:text-white">{formatCurrency(emp.monthly_ctc)}</p>
           <p className="text-xs text-slate-600">Annual: {formatCurrency(emp.annual_ctc)}</p>
         </div>
       </div>
@@ -101,9 +101,9 @@ export default function EmployeeDetailPage() {
       </div>
 
       {/* Deployment History */}
-      <div className="bg-slate-900/50 border border-slate-800/60 rounded-2xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-slate-800/60">
-          <h2 className="text-sm font-semibold text-white">Deployment History</h2>
+      <div className="bg-white/50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl overflow-hidden">
+        <div className="px-5 py-4 border-b border-slate-200/60 dark:border-slate-800/60">
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Deployment History</h2>
         </div>
         {deployments.length === 0 ? (
           <div className="px-5 py-10 text-center text-slate-500 text-sm">No deployments found for this employee.</div>
@@ -113,7 +113,7 @@ export default function EmployeeDetailPage() {
               <div key={d.id} className="px-5 py-4 flex items-start gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <p className="text-sm font-medium text-white">{d.project_name ?? d.po_number}</p>
+                    <p className="text-sm font-medium text-slate-900 dark:text-white">{d.project_name ?? d.po_number}</p>
                     <StatusBadge status={d.status} />
                   </div>
                   <p className="text-xs text-slate-500 mt-0.5">PO: {d.po_number} · {d.client ?? 'Unknown client'}</p>
@@ -124,7 +124,7 @@ export default function EmployeeDetailPage() {
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-sm font-medium text-white">{formatCurrency(d.revenue)}</p>
+                  <p className="text-sm font-medium text-slate-900 dark:text-white">{formatCurrency(d.revenue)}</p>
                   <p className="text-xs text-slate-500">Revenue</p>
                 </div>
               </div>

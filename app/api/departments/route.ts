@@ -3,7 +3,6 @@ import { createClient } from '@/lib/supabase/server';
 import { logger } from '@/lib/utils/logger';
 import type { ApiResponse, DepartmentListItem } from '@/types/app.types';
 
-// TODO: Phase 2 — Add Supabase Auth middleware here
 
 export async function GET(): Promise<NextResponse<ApiResponse<DepartmentListItem[]>>> {
   try {
