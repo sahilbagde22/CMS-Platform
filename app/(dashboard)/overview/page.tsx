@@ -7,7 +7,9 @@ import {
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { MetricCard } from '@/components/shared/MetricCard';
+import KPICard from '@/components/shared/KPICard';
+import Card from '@/components/shared/Card';
+import ChartWrapper from '@/components/charts/ChartWrapper';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { ExportDropdown } from '@/components/shared/ExportDropdown';
 import { AiInsights } from '@/components/dashboard/AiInsights';
@@ -25,20 +27,22 @@ const ReactECharts = dynamic(() => import('echarts-for-react'), { ssr: false });
 // Skeleton shimmer
 function SkeletonCard() {
   return (
-    <div className="p-5 bg-white/50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl animate-pulse">
-      <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 mb-3" />
-      <div className="h-7 w-24 bg-slate-100 dark:bg-slate-800 rounded mb-2" />
-      <div className="h-3 w-16 bg-slate-100 dark:bg-slate-800 rounded" />
-    </div>
+    <Card className="p-6">
+      <div className="flex flex-col gap-4 animate-pulse">
+        <div className="flex items-center justify-between">
+          <div className="h-4 w-24 bg-gray-200 rounded"></div>
+        </div>
+        <div className="h-8 w-32 bg-gray-200 rounded"></div>
+      </div>
+    </Card>
   );
 }
 
 function ChartSkeleton({ height = 280 }: { height?: number }) {
   return (
-    <div
-      className="bg-white/50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl animate-pulse"
-      style={{ height }}
-    />
+    <Card className="p-6">
+      <div className="w-full bg-gray-200 rounded animate-pulse" style={{ height }} />
+    </Card>
   );
 }
 
@@ -310,76 +314,69 @@ export default function OverviewPage() {
 
       {/* KPI Cards — 6 across on desktop */}
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-6">
-        <MetricCard
+        <KPICard
           label="Total Employees"
           value={data.total_employees}
-          icon={Users}
-          color="orange"
           trend={data.trends?.employees}
+          trendDirection={(data.trends?.employees ?? 0) >= 0 ? 'up' : 'down'}
         />
-        <MetricCard
+        <KPICard
           label="Deployed"
           value={data.deployed_count}
-          icon={TrendingUp}
-          color="emerald"
-          subtitle={formatPercentage(data.overall_deploy_pct) + ' rate'}
           trend={data.trends?.deployed}
+          trendDirection={(data.trends?.deployed ?? 0) >= 0 ? 'up' : 'down'}
         />
-        <MetricCard
+        <KPICard
           label="On Bench"
           value={data.bench_count}
-          icon={Clock}
-          color="amber"
-          trend={data.trends?.bench ? -data.trends.bench : undefined} // Negative trend is good if bench goes down
+          trend={data.trends?.bench ? -data.trends.bench : undefined}
+          trendDirection={data.trends?.bench && data.trends.bench < 0 ? 'up' : 'down'}
         />
-        <MetricCard
+        <KPICard
           label="Total Revenue"
           value={formatCurrency(data.total_revenue)}
-          icon={DollarSign}
-          color="cyan"
           trend={data.trends?.revenue}
+          trendDirection={(data.trends?.revenue ?? 0) >= 0 ? 'up' : 'down'}
         />
-        <MetricCard
+        <KPICard
           label="Total Profit"
           value={formatCurrency(data.total_profit)}
-          icon={data.total_profit >= 0 ? TrendingUp : TrendingDown}
-          color={data.total_profit >= 0 ? 'emerald' : 'rose'}
           trend={data.trends?.profit}
+          trendDirection={(data.trends?.profit ?? 0) >= 0 ? 'up' : 'down'}
         />
-        <MetricCard
+        <KPICard
           label="Overall GM%"
           value={formatPercentage(data.overall_gm_pct)}
-          icon={BarChart3}
-          color={data.overall_gm_pct >= 30 ? 'emerald' : 'amber'}
           trend={data.trends?.gm}
+          trendDirection={(data.trends?.gm ?? 0) >= 0 ? 'up' : 'down'}
         />
       </div>
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Deployment Pie */}
-        <div className="bg-white/50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5">
-          <h2 className="text-sm font-semibold text-slate-900 dark:text-white mb-4">Deployment Status</h2>
-          <ReactECharts option={deploymentPieOption} style={{ height: 220 }} />
-        </div>
+        <Card className="p-6">
+          <h2 className="mb-4 text-lg font-semibold text-gray-900">Deployment Status</h2>
+          <ChartWrapper option={deploymentPieOption} style={{ height: 220 }} />
+        </Card>
 
         {/* Revenue by Dept */}
-        <div className="bg-white/50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5">
-          <h2 className="text-sm font-semibold text-slate-900 dark:text-white mb-4">Revenue by Department</h2>
+        <Card className="p-6">
+          <h2 className="mb-4 text-lg font-semibold text-gray-900">Revenue by Department</h2>
           {deptData.length > 0
-            ? <ReactECharts option={revenueBarOption} style={{ height: 220 }} />
+            ? <ChartWrapper option={revenueBarOption} style={{ height: 220 }} />
             : <div className="h-[220px] flex items-center justify-center text-slate-600 text-sm">No department data</div>
           }
-        </div>
+        </Card>
 
         {/* GM% by Dept */}
-        <div className="bg-white/50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-5">
-          <h2 className="text-sm font-semibold text-slate-900 dark:text-white mb-4">GM% by Department</h2>
+        <Card className="p-6">
+          <h2 className="mb-4 text-lg font-semibold text-gray-900">GM% by Department</h2>
           {deptData.length > 0
-            ? <ReactECharts option={gmBarOption} style={{ height: 220 }} />
+            ? <ChartWrapper option={gmBarOption} style={{ height: 220 }} />
             : <div className="h-[220px] flex items-center justify-center text-slate-600 text-sm">No department data</div>
           }
-        </div>
+        </Card>
       </div>
     </div>
   );

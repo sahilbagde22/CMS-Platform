@@ -24,24 +24,20 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0B0C10] p-4 relative overflow-hidden">
-      {/* Background decorative elements */}
-      <div className="absolute top-1/4 -left-32 w-64 h-64 bg-orange-500/10 blur-[120px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-1/4 -right-32 w-64 h-64 bg-cyan-500/10 blur-[120px] rounded-full pointer-events-none" />
-
-      <div className="w-full max-w-md bg-white/50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-8 shadow-xl backdrop-blur-sm relative">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+      <div className="w-full max-w-md bg-white border border-gray-200 rounded-2xl p-8 shadow-sm relative">
         {/* Brand Logo */}
         <div className="flex flex-col items-center mb-8">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-orange-500/30 mb-4">
-            <Activity className="w-6 h-6 text-slate-900 dark:text-white" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-600 mb-4 shadow-sm">
+            <span className="text-xl font-bold text-white">D</span>
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight mb-1">Welcome Back</h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm">Sign in to your <span className="text-orange-400 font-medium">OpsHive</span> account</p>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight mb-1">Welcome Back</h1>
+          <p className="text-gray-500 text-sm">Sign in to your <span className="text-indigo-600 font-medium">Datahive</span> account</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5" htmlFor="email">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="email">
               Email Address
             </label>
             <input
@@ -49,13 +45,13 @@ export default function LoginPage() {
               name="email"
               type="email"
               required
-              className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300/50 dark:border-slate-700/50 rounded-xl px-4 py-2.5 text-slate-900 dark:text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all"
+              className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
               placeholder="you@company.com"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5" htmlFor="password">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="password">
               Password
             </label>
             <input
@@ -63,13 +59,13 @@ export default function LoginPage() {
               name="password"
               type="password"
               required
-              className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300/50 dark:border-slate-700/50 rounded-xl px-4 py-2.5 text-slate-900 dark:text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all"
+              className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
               placeholder="••••••••"
             />
           </div>
 
           {error && (
-            <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-lg text-rose-400 text-sm">
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
               {error}
             </div>
           )}
@@ -77,22 +73,22 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 disabled:opacity-50 disabled:hover:from-orange-600 text-slate-900 dark:text-white font-medium py-2.5 rounded-xl transition-all mt-6 shadow-lg shadow-orange-500/25"
+            className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-medium py-2.5 rounded-xl transition-colors mt-6 shadow-sm"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Sign In'} 
             {!loading && <ArrowRight className="w-4 h-4" />}
           </button>
         </form>
 
-        <div className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
+        <div className="mt-6 text-center text-sm text-gray-500">
           Don&apos;t have an account?{' '}
-          <Link href="/signup" className="text-orange-400 hover:text-orange-300 font-medium transition-colors">
+          <Link href="/signup" className="text-indigo-600 hover:text-indigo-500 font-medium transition-colors">
             Sign up
           </Link>
         </div>
 
         {/* Footer brand */}
-        <p className="text-center text-xs text-slate-600 mt-6">OpsHive v2.0 · Operations Intelligence</p>
+        <p className="text-center text-xs text-gray-400 mt-6">Datahive · Operations Intelligence</p>
       </div>
     </div>
   );

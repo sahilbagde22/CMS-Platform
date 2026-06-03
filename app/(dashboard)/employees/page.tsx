@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useState, useMemo, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Users, Upload, Search } from 'lucide-react';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { EmptyState } from '@/components/shared/EmptyState';
+import Card from '@/components/shared/Card';
 import { ExportDropdown } from '@/components/shared/ExportDropdown';
 import { formatCurrency } from '@/lib/utils/format-currency';
 import { formatPercentage } from '@/lib/utils/format-percentage';
@@ -29,10 +30,11 @@ function TableSkeleton() {
 
 export default function EmployeesPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [employees, setEmployees] = useState<EmployeeListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(searchParams.get('q') || '');
   const [filterDept, setFilterDept] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [sortCol, setSortCol] = useState<'name' | 'total_revenue' | 'gross_margin_pct'>('name');
@@ -56,6 +58,13 @@ export default function EmployeesPage() {
     }
     load();
   }, [filterDept, filterStatus]);
+
+  useEffect(() => {
+    const q = searchParams.get('q');
+    if (q !== null) {
+      setSearch(q);
+    }
+  }, [searchParams]);
 
   const departments = useMemo(() => [...new Set(employees.map((e) => e.department))].sort(), [employees]);
 
@@ -179,11 +188,11 @@ export default function EmployeesPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white/50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl overflow-hidden">
+      <Card className="overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[700px]">
             <thead>
-              <tr className="border-b border-slate-200/60 dark:border-slate-800/60">
+              <tr className="border-b border-slate-200/60 dark:border-slate-800/60 bg-slate-50 dark:bg-slate-900/50">
                 {[
                   { label: 'Name', col: 'name' as const },
                   { label: 'Department', col: null },
@@ -196,37 +205,37 @@ export default function EmployeesPage() {
                   <th
                     key={label}
                     onClick={() => col && toggleSort(col)}
-                    className={`text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3 ${col ? 'cursor-pointer hover:text-slate-700 dark:text-slate-300 select-none' : ''}`}
+                    className={`text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-4 ${col ? 'cursor-pointer hover:text-slate-700 dark:text-slate-300 select-none' : ''}`}
                   >
                     {label}{col && <SortIndicator col={col} />}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/40">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/40">
               {loading
                 ? null
                 : filtered.map((emp) => (
                     <tr
                       key={emp.id}
                       onClick={() => router.push(`/employees/${emp.emp_id}`)}
-                      className="hover:bg-slate-100/30 dark:bg-slate-800/30 cursor-pointer transition-colors group"
+                      className="hover:bg-slate-50 dark:hover:bg-slate-800/30 cursor-pointer transition-colors group"
                     >
-                      <td className="px-5 py-3.5">
-                        <p className="text-sm font-medium text-slate-900 dark:text-white group-hover:text-orange-300 transition-colors">{emp.name}</p>
+                      <td className="px-6 py-4">
+                        <p className="text-sm font-medium text-slate-900 dark:text-white group-hover:text-orange-500 transition-colors">{emp.name}</p>
                         <p className="text-xs text-slate-500">{emp.emp_id}</p>
                       </td>
-                      <td className="px-5 py-3.5 text-sm text-slate-500 dark:text-slate-400">{emp.department}</td>
-                      <td className="px-5 py-3.5 text-sm text-slate-500 dark:text-slate-400">{emp.designation ?? '—'}</td>
-                      <td className="px-5 py-3.5"><StatusBadge status={emp.status} /></td>
-                      <td className="px-5 py-3.5 text-sm text-slate-700 dark:text-slate-300 font-medium">{formatCurrency(emp.metrics?.total_revenue)}</td>
-                      <td className="px-5 py-3.5 text-sm font-medium">
-                        <span className={`${(emp.metrics?.gross_margin_pct ?? 0) >= 30 ? 'text-emerald-400' : (emp.metrics?.gross_margin_pct ?? 0) >= 0 ? 'text-amber-400' : 'text-rose-400'}`}>
+                      <td className="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">{emp.department}</td>
+                      <td className="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">{emp.designation ?? '—'}</td>
+                      <td className="px-6 py-4"><StatusBadge status={emp.status} /></td>
+                      <td className="px-6 py-4 text-sm text-slate-700 dark:text-slate-300 font-medium">{formatCurrency(emp.metrics?.total_revenue)}</td>
+                      <td className="px-6 py-4 text-sm font-medium">
+                        <span className={`${(emp.metrics?.gross_margin_pct ?? 0) >= 30 ? 'text-emerald-500' : (emp.metrics?.gross_margin_pct ?? 0) >= 0 ? 'text-amber-500' : 'text-rose-500'}`}>
                           {formatPercentage(emp.metrics?.gross_margin_pct)}
                         </span>
                       </td>
-                      <td className="px-5 py-3.5">
-                        {emp.metrics ? <StatusBadge status={emp.metrics.deployment_status} /> : <span className="text-slate-600 text-xs">—</span>}
+                      <td className="px-6 py-4">
+                        {emp.metrics ? <StatusBadge status={emp.metrics.deployment_status} /> : <span className="text-slate-500 text-xs">—</span>}
                       </td>
                     </tr>
                   ))}
@@ -243,7 +252,7 @@ export default function EmployeesPage() {
             ctaHref="/upload"
           />
         )}
-      </div>
+      </Card>
     </div>
   );
 }

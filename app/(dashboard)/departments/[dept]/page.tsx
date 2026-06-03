@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Users } from 'lucide-react';
 import { StatusBadge } from '@/components/shared/StatusBadge';
-import { MetricCard } from '@/components/shared/MetricCard';
+import KPICard from '@/components/shared/KPICard';
+import Card from '@/components/shared/Card';
 import { formatCurrency } from '@/lib/utils/format-currency';
 import { formatPercentage } from '@/lib/utils/format-percentage';
 import type { DepartmentDetail } from '@/types/app.types';
@@ -36,9 +37,9 @@ export default function DepartmentDetailPage() {
     <div className="p-6 max-w-5xl mx-auto space-y-6 animate-pulse">
       <div className="h-7 w-48 bg-slate-100 dark:bg-slate-800 rounded" />
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-24 bg-white/50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl" />)}
+        {Array.from({ length: 4 }).map((_, i) => <Card key={i} className="h-24 animate-pulse bg-gray-100" />)}
       </div>
-      <div className="h-64 bg-white/50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl" />
+      <Card className="h-64 animate-pulse bg-gray-100" />
     </div>
   );
 
@@ -68,20 +69,20 @@ export default function DepartmentDetailPage() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <MetricCard label="Deployed" value={metrics.deployed_count} color="emerald" subtitle={formatPercentage(metrics.deployment_pct) + ' rate'} />
-        <MetricCard label="On Bench" value={metrics.bench_count} color="amber" />
-        <MetricCard label="Revenue" value={formatCurrency(metrics.total_revenue)} color="cyan" />
-        <MetricCard label="GM%" value={formatPercentage(metrics.gross_margin_pct)} color={metrics.gross_margin_pct >= 30 ? 'emerald' : 'amber'} />
+        <KPICard label="Deployed" value={metrics.deployed_count} />
+        <KPICard label="On Bench" value={metrics.bench_count} />
+        <KPICard label="Revenue" value={formatCurrency(metrics.total_revenue)} />
+        <KPICard label="GM%" value={formatPercentage(metrics.gross_margin_pct)} />
       </div>
 
-      <div className="bg-white/50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-slate-200/60 dark:border-slate-800/60">
+      <Card className="overflow-hidden">
+        <div className="px-5 py-4 border-b border-gray-200 bg-gray-50">
           <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Employees in {decodeURIComponent(dept)}</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[600px]">
             <thead>
-              <tr className="border-b border-slate-200/60 dark:border-slate-800/60">
+              <tr className="border-b border-gray-200 bg-gray-50">
                 {['Name', 'Designation', 'Status', 'Deploy Status', 'Revenue', 'GM%'].map((h) => (
                   <th key={h} className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3">{h}</th>
                 ))}
@@ -112,7 +113,7 @@ export default function DepartmentDetailPage() {
             </tbody>
           </table>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

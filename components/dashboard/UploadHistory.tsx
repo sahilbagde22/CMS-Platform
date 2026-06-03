@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Clock, CheckCircle, XCircle, FileSpreadsheet, Loader2, AlertTriangle } from 'lucide-react';
+import Card from '@/components/shared/Card';
 import { formatCurrency } from '@/lib/utils/format-currency';
 
 interface UploadHistoryItem {
@@ -80,13 +81,13 @@ export function UploadHistory({ refreshTrigger = 0 }: UploadHistoryProps) {
 
       <div className="space-y-3">
         {history.map((upload) => (
-          <div key={upload.id} className="flex flex-col sm:flex-row gap-4 p-4 bg-white/50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl hover:border-slate-300/60 dark:border-slate-700/60 transition-colors">
+          <Card key={upload.id} className="flex flex-col sm:flex-row gap-4 p-4 transition-colors">
             {/* Icon & File info */}
             <div className="flex items-start gap-4 flex-1">
               <div className={`p-2.5 rounded-xl shrink-0 ${
-                upload.status === 'ready' ? 'bg-emerald-500/10 text-emerald-400' :
-                upload.status === 'error' ? 'bg-rose-500/10 text-rose-400' :
-                'bg-orange-500/10 text-orange-400'
+                upload.status === 'ready' ? 'bg-emerald-50 text-emerald-600' :
+                upload.status === 'error' ? 'bg-rose-50 text-rose-600' :
+                'bg-orange-50 text-orange-600'
               }`}>
                 {upload.status === 'ready' ? <CheckCircle className="w-5 h-5" /> :
                  upload.status === 'error' ? <XCircle className="w-5 h-5" /> :
@@ -94,14 +95,14 @@ export function UploadHistory({ refreshTrigger = 0 }: UploadHistoryProps) {
               </div>
               
               <div>
-                <p className="font-medium text-slate-800 dark:text-slate-200 line-clamp-1">{upload.file_name}</p>
-                <div className="flex items-center gap-3 mt-1 text-xs text-slate-500">
+                <p className="font-medium text-gray-900 line-clamp-1">{upload.file_name}</p>
+                <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
                   <span>{new Date(upload.uploaded_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}</span>
-                  <span className="w-1 h-1 bg-slate-700 rounded-full"></span>
+                  <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
                   <span>{formatBytes(upload.file_size)}</span>
                 </div>
                 {upload.status === 'error' && upload.error_msg && (
-                  <p className="text-xs text-rose-400 mt-2 bg-rose-500/10 px-2 py-1 rounded-md inline-block">
+                  <p className="text-xs text-rose-600 mt-2 bg-rose-50 px-2 py-1 rounded-md inline-block">
                     {upload.error_msg}
                   </p>
                 )}
@@ -110,22 +111,22 @@ export function UploadHistory({ refreshTrigger = 0 }: UploadHistoryProps) {
 
             {/* Metrics */}
             {upload.status === 'ready' && upload.metrics && (
-              <div className="flex items-center gap-6 pt-3 sm:pt-0 border-t sm:border-t-0 sm:border-l border-slate-200/60 dark:border-slate-800/60 sm:pl-6 shrink-0">
+              <div className="flex items-center gap-6 pt-3 sm:pt-0 border-t sm:border-t-0 sm:border-l border-gray-100 sm:pl-6 shrink-0">
                 <div>
-                  <p className="text-xs text-slate-500 mb-1">Employees</p>
-                  <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{upload.metrics.total_employees}</p>
+                  <p className="text-xs text-gray-500 mb-1">Employees</p>
+                  <p className="text-sm font-medium text-gray-900">{upload.metrics.total_employees}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500 mb-1">Revenue</p>
-                  <p className="text-sm font-medium text-emerald-400">{formatCurrency(upload.metrics.total_revenue)}</p>
+                  <p className="text-xs text-gray-500 mb-1">Revenue</p>
+                  <p className="text-sm font-medium text-emerald-600">{formatCurrency(upload.metrics.total_revenue)}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500 mb-1">GM %</p>
-                  <p className="text-sm font-medium text-cyan-400">{upload.metrics.overall_gm_pct.toFixed(1)}%</p>
+                  <p className="text-xs text-gray-500 mb-1">GM %</p>
+                  <p className="text-sm font-medium text-indigo-600">{upload.metrics.overall_gm_pct.toFixed(1)}%</p>
                 </div>
               </div>
             )}
-          </div>
+          </Card>
         ))}
       </div>
     </div>

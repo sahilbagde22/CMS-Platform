@@ -1,9 +1,11 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Building2, Upload } from 'lucide-react';
+import { Building2, Upload, Search } from 'lucide-react';
 import { EmptyState } from '@/components/shared/EmptyState';
+import Card from '@/components/shared/Card';
 import { ExportDropdown } from '@/components/shared/ExportDropdown';
 import { formatCurrency } from '@/lib/utils/format-currency';
 import { formatPercentage } from '@/lib/utils/format-percentage';
@@ -12,13 +14,16 @@ import { exportDepartmentsPdf } from '@/lib/utils/export-pdf';
 import type { DepartmentListItem } from '@/types/app.types';
 
 function SkeletonCard() {
-  return <div className="h-44 bg-white/50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl animate-pulse" />;
+  return <Card className="h-44 animate-pulse bg-gray-100" />;
 }
 
 export default function DepartmentsPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [departments, setDepartments] = useState<DepartmentListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState(searchParams.get('q') || '');
 
   useEffect(() => {
     async function load() {
@@ -35,6 +40,13 @@ export default function DepartmentsPage() {
     }
     load();
   }, []);
+
+  useEffect(() => {
+    const q = searchParams.get('q');
+    if (q !== null) {
+      setSearch(q);
+    }
+  }, [searchParams]);
 
   const handleExportExcel = useCallback(() => {
     exportDepartments(
@@ -67,6 +79,14 @@ export default function DepartmentsPage() {
     );
   }, [departments]);
 
+  const filtered = useMemo(() => {
+    if (!search) return departments;
+    const q = search.toLowerCase();
+    return departments.filter(d =>
+      d.department.toLowerCase().includes(q)
+    );
+  }, [departments, search]);
+
   if (error) return (
     <div className="p-6">
       <div className="bg-rose-500/10 border border-rose-500/20 rounded-2xl p-4 text-rose-400 text-sm">{error}</div>
@@ -85,6 +105,20 @@ export default function DepartmentsPage() {
         )}
       </div>
 
+      {/* Filters */}
+      <div className="flex flex-wrap gap-3">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search departments..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 w-64 shadow-sm"
+          />
+        </div>
+      </div>
+
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
           {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
@@ -97,9 +131,17 @@ export default function DepartmentsPage() {
           ctaLabel="Upload Data"
           ctaHref="/upload"
         />
+      ) : filtered.length === 0 ? (
+        <EmptyState
+          icon={Building2}
+          title="No results found"
+          description={`No departments match the search query "${search}".`}
+          ctaLabel="Clear Search"
+          ctaHref="/departments"
+        />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-          {departments.map((dept) => {
+          {filtered.map((dept) => {
             const gmColor =
               dept.gross_margin_pct >= 30
                 ? 'text-emerald-400'
@@ -111,8 +153,9 @@ export default function DepartmentsPage() {
               <Link
                 key={dept.department}
                 href={`/departments/${encodeURIComponent(dept.department)}`}
-                className="block p-6 bg-white/50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl hover:border-orange-500/30 hover:bg-white/80 dark:bg-slate-900/80 transition-all group hover:scale-[1.01] hover:shadow-lg hover:shadow-orange-500/10"
+                className="block group"
               >
+                <Card className="p-6 transition-all hover:scale-[1.01] hover:shadow-lg">
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <h2 className="text-base font-semibold text-slate-900 dark:text-white group-hover:text-orange-300 transition-colors">
@@ -148,6 +191,7 @@ export default function DepartmentsPage() {
                     <p className={`text-sm font-semibold ${gmColor}`}>{formatPercentage(dept.gross_margin_pct)}</p>
                   </div>
                 </div>
+                </Card>
               </Link>
             );
           })}

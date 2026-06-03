@@ -56,6 +56,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
   
+  // If user is not logged in and visits root, redirect to login
+  if (!user && request.nextUrl.pathname === '/') {
+    const url = request.nextUrl.clone();
+    url.pathname = '/login';
+    return NextResponse.redirect(url);
+  }
+
   // If user is logged in and visits root, redirect to overview
   if (user && request.nextUrl.pathname === '/') {
     const url = request.nextUrl.clone();

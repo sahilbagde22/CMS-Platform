@@ -108,7 +108,7 @@ function SummaryBadge({ count, severity }: { count: number; severity: AlertSever
 export function AlertsPanel() {
   const [data, setData] = useState<AlertsData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true); // Default to collapsed
 
   useEffect(() => {
     async function fetchAlerts() {
@@ -182,7 +182,7 @@ export function AlertsPanel() {
       {!collapsed && (
         <div
           className={`
-            border-t divide-y
+            border-t divide-y max-h-[300px] overflow-y-auto custom-scrollbar
             ${hasCritical
               ? 'border-rose-200 dark:border-rose-500/15 divide-rose-200 dark:divide-rose-500/10'
               : 'border-amber-200 dark:border-amber-500/10 divide-amber-200 dark:divide-amber-500/8'

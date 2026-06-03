@@ -7,7 +7,7 @@ interface MetricCardProps {
   subtitle?: string;
   icon?: LucideIcon;
   trend?: number; // positive = up, negative = down
-  color?: 'orange' | 'cyan' | 'emerald' | 'amber' | 'rose';
+  color?: 'orange' | 'cyan' | 'emerald' | 'amber' | 'rose' | 'violet';
   className?: string;
 }
 
@@ -41,6 +41,12 @@ const COLOR_MAP = {
     icon: 'text-rose-400',
     iconBg: 'bg-rose-500/10 border-rose-500/20',
     shadow: 'hover:shadow-rose-500/20',
+  },
+  violet: {
+    bg: 'from-violet-500/15 to-violet-600/5 border-violet-500/20',
+    icon: 'text-violet-400',
+    iconBg: 'bg-violet-500/10 border-violet-500/20',
+    shadow: 'hover:shadow-violet-500/20',
   },
 };
 
