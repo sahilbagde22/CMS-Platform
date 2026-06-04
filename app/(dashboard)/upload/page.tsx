@@ -166,11 +166,11 @@ export default function UploadPage() {
       </div>
 
       {/* Required Sheets Info */}
-      <div className="bg-orange-500/10 border border-orange-500/20 rounded-2xl p-4">
-        <p className="text-xs font-medium text-orange-300 mb-2">Required sheets in your Excel file:</p>
+      <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-2xl p-4">
+        <p className="text-xs font-medium text-indigo-700 dark:text-indigo-400 mb-2">Required sheets in your Excel file:</p>
         <div className="flex flex-wrap gap-2">
           {REQUIRED_SHEETS.map((s) => (
-            <span key={s} className="px-2.5 py-1 bg-orange-500/15 border border-orange-500/20 rounded-lg text-xs font-mono text-orange-300">
+            <span key={s} className="px-2.5 py-1 bg-indigo-500/15 border border-indigo-500/20 rounded-lg text-xs font-mono text-indigo-800 dark:text-indigo-300">
               {s}
             </span>
           ))}
@@ -226,7 +226,7 @@ export default function UploadPage() {
               <TableProperties className="w-6 h-6 text-orange-400 shrink-0" />
               <p className="text-slate-900 dark:text-white font-semibold">Review Column Mappings</p>
             </div>
-            <p className="text-orange-300 text-sm pl-9">
+            <p className="text-orange-700 dark:text-orange-300 text-sm pl-9">
               We&apos;ve automatically matched your Excel headers to the database columns. 
               Please verify them below before saving.
             </p>
@@ -261,7 +261,7 @@ export default function UploadPage() {
                               onChange={(e) => handleMappingChange(sheet.sheetName, header, e.target.value)}
                               className={`
                                 w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-1.5 text-sm outline-none transition-colors
-                                ${currentValue === 'ignore' ? 'text-slate-500' : 'text-emerald-400 border-emerald-500/30 bg-emerald-500/5'}
+                                ${currentValue === 'ignore' ? 'text-slate-500' : 'text-emerald-700 dark:text-emerald-400 border-emerald-500/30 bg-emerald-500/5'}
                                 focus:border-orange-500 focus:ring-1 focus:ring-orange-500
                               `}
                             >
@@ -289,7 +289,7 @@ export default function UploadPage() {
             </button>
             <button
               onClick={handleProcess}
-              className="flex items-center gap-2 px-5 py-2.5 bg-orange-600 hover:bg-orange-500 text-slate-900 dark:text-white text-sm font-medium rounded-xl transition-all shadow-lg shadow-orange-500/20"
+              className="flex items-center gap-2 px-5 py-2.5 bg-pink-600 hover:bg-pink-500 text-white dark:text-white text-sm font-medium rounded-xl transition-all shadow-lg shadow-pink-500/20"
             >
               Confirm & Process Data <ArrowRight className="w-4 h-4" />
             </button>
@@ -314,13 +314,13 @@ export default function UploadPage() {
           <div className="flex gap-3">
             <Link
               href="/overview"
-              className="flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-500 text-slate-900 dark:text-white text-sm font-medium rounded-xl transition-all"
+              className="flex items-center gap-2 px-4 py-2 bg-pink-600 hover:bg-pink-500 text-white dark:text-white text-sm font-medium rounded-xl transition-all shadow-lg shadow-pink-500/20"
             >
               View Dashboard <ArrowRight className="w-4 h-4" />
             </Link>
             <button
               onClick={reset}
-              className="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-medium rounded-xl transition-all"
+              className="px-4 py-2 border border-blue-200 dark:border-blue-500/20 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 dark:hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 text-sm font-medium rounded-xl transition-all"
             >
               Upload Another
             </button>

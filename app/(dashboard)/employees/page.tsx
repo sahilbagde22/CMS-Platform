@@ -219,7 +219,7 @@ export default function EmployeesPage() {
                     <tr
                       key={emp.id}
                       onClick={() => router.push(`/employees/${emp.emp_id}`)}
-                      className="hover:bg-slate-50 dark:hover:bg-slate-800/30 cursor-pointer transition-colors group"
+                      className="hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition-colors group"
                     >
                       <td className="px-6 py-4">
                         <p className="text-sm font-medium text-slate-900 dark:text-white group-hover:text-orange-500 transition-colors">{emp.name}</p>

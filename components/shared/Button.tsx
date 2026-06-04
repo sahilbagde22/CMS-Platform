@@ -12,7 +12,7 @@ export default function Button({
   size?: 'sm' | 'md' | 'lg';
 }) {
   const baseStyles =
-    'font-medium transition-all duration-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2';
+    'font-medium transition-all duration-200 ease-in-out rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]';
 
   const variants = {
     primary:

@@ -295,7 +295,7 @@ export default function OverviewPage() {
           />
           <Link
             href="/upload"
-            className="flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-500 text-slate-900 dark:text-white text-sm font-medium rounded-xl transition-all shadow-lg shadow-orange-500/20"
+            className="flex items-center gap-2 px-4 py-2 bg-pink-600 hover:bg-pink-500 text-white text-sm font-medium rounded-xl transition-all shadow-lg shadow-pink-500/20"
           >
             <Upload className="w-4 h-4" />
             Upload New
@@ -356,13 +356,13 @@ export default function OverviewPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Deployment Pie */}
         <Card className="p-6">
-          <h2 className="mb-4 text-lg font-semibold text-gray-900">Deployment Status</h2>
+          <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-slate-100">Deployment Status</h2>
           <ChartWrapper option={deploymentPieOption} style={{ height: 220 }} />
         </Card>
 
         {/* Revenue by Dept */}
         <Card className="p-6">
-          <h2 className="mb-4 text-lg font-semibold text-gray-900">Revenue by Department</h2>
+          <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-slate-100">Revenue by Department</h2>
           {deptData.length > 0
             ? <ChartWrapper option={revenueBarOption} style={{ height: 220 }} />
             : <div className="h-[220px] flex items-center justify-center text-slate-600 text-sm">No department data</div>
@@ -371,7 +371,7 @@ export default function OverviewPage() {
 
         {/* GM% by Dept */}
         <Card className="p-6">
-          <h2 className="mb-4 text-lg font-semibold text-gray-900">GM% by Department</h2>
+          <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-slate-100">GM% by Department</h2>
           {deptData.length > 0
             ? <ChartWrapper option={gmBarOption} style={{ height: 220 }} />
             : <div className="h-[220px] flex items-center justify-center text-slate-600 text-sm">No department data</div>

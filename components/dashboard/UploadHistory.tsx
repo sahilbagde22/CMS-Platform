@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Clock, CheckCircle, XCircle, FileSpreadsheet, Loader2, AlertTriangle } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, FileSpreadsheet, Loader2, AlertTriangle, Trash2 } from 'lucide-react';
 import Card from '@/components/shared/Card';
 import { formatCurrency } from '@/lib/utils/format-currency';
+import { toast } from 'sonner';
 
 interface UploadHistoryItem {
   id: string;
@@ -45,6 +46,21 @@ export function UploadHistory({ refreshTrigger = 0 }: UploadHistoryProps) {
     fetchHistory();
   }, [refreshTrigger]);
 
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this upload history?')) return;
+    
+    try {
+      const res = await fetch(`/api/uploads/${id}`, { method: 'DELETE' });
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.error ?? 'Failed to delete');
+      
+      toast.success('Upload history deleted successfully');
+      fetchHistory();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to delete');
+    }
+  };
+
   function formatBytes(bytes: number) {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -81,7 +97,7 @@ export function UploadHistory({ refreshTrigger = 0 }: UploadHistoryProps) {
 
       <div className="space-y-3">
         {history.map((upload) => (
-          <Card key={upload.id} className="flex flex-col sm:flex-row gap-4 p-4 transition-colors">
+          <Card key={upload.id} className="flex flex-col sm:flex-row gap-4 p-4 relative">
             {/* Icon & File info */}
             <div className="flex items-start gap-4 flex-1">
               <div className={`p-2.5 rounded-xl shrink-0 ${
@@ -94,7 +110,7 @@ export function UploadHistory({ refreshTrigger = 0 }: UploadHistoryProps) {
                  <Loader2 className="w-5 h-5 animate-spin" />}
               </div>
               
-              <div>
+              <div className="pr-12 sm:pr-0">
                 <p className="font-medium text-gray-900 line-clamp-1">{upload.file_name}</p>
                 <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
                   <span>{new Date(upload.uploaded_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}</span>
@@ -110,22 +126,34 @@ export function UploadHistory({ refreshTrigger = 0 }: UploadHistoryProps) {
             </div>
 
             {/* Metrics */}
-            {upload.status === 'ready' && upload.metrics && (
-              <div className="flex items-center gap-6 pt-3 sm:pt-0 border-t sm:border-t-0 sm:border-l border-gray-100 sm:pl-6 shrink-0">
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Employees</p>
-                  <p className="text-sm font-medium text-gray-900">{upload.metrics.total_employees}</p>
+            <div className="flex items-center gap-4 ml-auto">
+              {upload.status === 'ready' && upload.metrics && (
+                <div className="flex items-center gap-6 pt-3 sm:pt-0 border-t sm:border-t-0 sm:border-l border-gray-100 sm:pl-6 shrink-0">
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">Employees</p>
+                    <p className="text-sm font-medium text-gray-900">{upload.metrics.total_employees}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">Revenue</p>
+                    <p className="text-sm font-medium text-emerald-600">{formatCurrency(upload.metrics.total_revenue)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">GM %</p>
+                    <p className="text-sm font-medium text-indigo-600">{upload.metrics.overall_gm_pct.toFixed(1)}%</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Revenue</p>
-                  <p className="text-sm font-medium text-emerald-600">{formatCurrency(upload.metrics.total_revenue)}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">GM %</p>
-                  <p className="text-sm font-medium text-indigo-600">{upload.metrics.overall_gm_pct.toFixed(1)}%</p>
-                </div>
+              )}
+              
+              <div className="flex items-center pl-4 border-l border-gray-100 shrink-0">
+                <button 
+                  onClick={() => handleDelete(upload.id)}
+                  className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                  title="Delete History"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
               </div>
-            )}
+            </div>
           </Card>
         ))}
       </div>

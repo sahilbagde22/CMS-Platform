@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { signup } from '@/app/actions/auth';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Loader2, ArrowRight, CheckCircle, Activity } from 'lucide-react';
 
 export default function SignupPage() {
@@ -29,15 +30,22 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <div className="w-full max-w-md bg-white border border-gray-200 rounded-2xl p-8 shadow-sm relative">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 relative overflow-hidden p-4">
+      {/* Dynamic Background Elements */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-200/50 via-slate-50 to-white opacity-80"></div>
+        <div className="absolute top-0 right-0 -translate-y-12 translate-x-1/3 w-[800px] h-[600px] bg-indigo-400/30 rounded-full blur-[120px] mix-blend-multiply pointer-events-none animate-blob"></div>
+        <div className="absolute bottom-0 left-0 translate-y-1/3 -translate-x-1/3 w-[600px] h-[600px] bg-blue-400/20 rounded-full blur-[120px] mix-blend-multiply pointer-events-none animate-blob [animation-delay:4s]"></div>
+      </div>
+
+      <div className="w-full max-w-md bg-white/70 backdrop-blur-2xl border border-white/60 rounded-2xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.06)] relative z-10">
         {/* Brand Logo */}
         <div className="flex flex-col items-center mb-8">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-600 mb-4 shadow-sm">
-            <span className="text-xl font-bold text-white">D</span>
+          <div className="relative flex h-12 w-24 items-center justify-center mb-4 bg-transparent">
+            <Image src="/logo.png" alt="PulseHQ Logo" fill className="object-contain" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900 tracking-tight mb-1">Create Account</h1>
-          <p className="text-gray-500 text-sm">Join <span className="text-indigo-600 font-medium">Datahive</span> to manage your operations</p>
+          <p className="text-gray-500 text-sm">Join <span className="text-indigo-600 font-medium">PulseHQ</span> to manage your operations</p>
         </div>
 
         {success ? (
@@ -112,7 +120,7 @@ export default function SignupPage() {
         )}
 
         {/* Footer brand */}
-        <p className="text-center text-xs text-gray-400 mt-6">Datahive · Operations Intelligence</p>
+        <p className="text-center text-xs text-gray-400 mt-6">PulseHQ · Operations Intelligence</p>
       </div>
     </div>
   );

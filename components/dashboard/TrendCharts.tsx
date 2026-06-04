@@ -229,8 +229,8 @@ export function TrendCharts() {
                 className={`
                   px-3 py-1.5 rounded-lg text-xs font-medium transition-all
                   ${idx === activePreset
-                    ? 'bg-orange-500/20 text-orange-300 border border-orange-500/30'
-                    : 'text-slate-500 hover:text-slate-700 dark:text-slate-300 hover:bg-slate-100/60 dark:bg-slate-800/60'
+                    ? 'bg-orange-100 dark:bg-orange-500/20 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-500/30'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100/60 dark:hover:bg-slate-800/60'
                   }
                 `}
               >

@@ -56,11 +56,11 @@ export function ExportDropdown({
       <button
         onClick={() => setOpen((v) => !v)}
         disabled={disabled}
-        className="flex items-center gap-2 px-3 py-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 text-emerald-400 text-sm font-medium rounded-xl transition-all disabled:opacity-50"
+        className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium rounded-xl transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-50"
       >
-        <Download className="w-3.5 h-3.5" />
+        <Download className="w-4 h-4" />
         {label}
-        <ChevronDown className={`w-3 h-3 transition-transform ${open ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-4 h-4 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
 
       {open && (

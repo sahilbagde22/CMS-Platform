@@ -11,6 +11,23 @@ export function AiInsights() {
 
   useEffect(() => {
     async function fetchInsights() {
+      const cacheKey = 'pulsehq_ai_insights_v1';
+      const cached = sessionStorage.getItem(cacheKey);
+      
+      if (cached) {
+        try {
+          const { data, timestamp } = JSON.parse(cached);
+          // Cache for 10 minutes
+          if (Date.now() - timestamp < 10 * 60 * 1000) {
+            setInsights(data);
+            setLoading(false);
+            return;
+          }
+        } catch (e) {
+          // ignore parse error
+        }
+      }
+
       try {
         const res = await fetch('/api/ai/insights');
         const json = await res.json();
@@ -20,8 +37,16 @@ export function AiInsights() {
         }
         
         setInsights(json.insights);
+        sessionStorage.setItem(cacheKey, JSON.stringify({
+          data: json.insights,
+          timestamp: Date.now()
+        }));
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unknown error occurred');
+        let errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+        if (errorMessage.includes('429') || errorMessage.toLowerCase().includes('quota')) {
+          errorMessage = 'Gemini API free tier rate limit reached. Please wait a minute and refresh the page to generate new insights.';
+        }
+        setError(errorMessage);
       } finally {
         setLoading(false);
       }

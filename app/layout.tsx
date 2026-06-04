@@ -8,8 +8,8 @@ const inter = Inter({ subsets: ['latin'], display: 'swap' });
 
 export const metadata: Metadata = {
   title: {
-    default: 'OpsHive — Operations Intelligence Platform',
-    template: '%s — OpsHive',
+    default: 'PulseHQ — Operations Intelligence Platform',
+    template: '%s — PulseHQ',
   },
   description:
     'Operations intelligence platform — upload Excel data, track workforce metrics, and get AI-powered insights for your services business.',

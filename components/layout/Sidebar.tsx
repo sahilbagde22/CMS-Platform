@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
@@ -43,7 +44,7 @@ export default function Sidebar() {
 
   return (
     <aside
-      className={`flex flex-col gap-8 border-r border-gray-200 bg-white px-6 py-8 transition-all duration-300 ${
+      className={`flex flex-col gap-8 border-r border-slate-200 dark:border-slate-800 bg-slate-50/80 backdrop-blur-xl dark:bg-slate-950/80 px-6 py-8 transition-all duration-300 ${
         isCollapsed ? 'w-20' : 'w-64'
       }`}
     >
@@ -51,15 +52,15 @@ export default function Sidebar() {
       <div className="flex items-center justify-between">
         {!isCollapsed && (
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600">
-              <span className="text-sm font-bold text-white">D</span>
+            <div className="relative flex h-8 w-14 items-center justify-center overflow-hidden rounded-md bg-transparent">
+              <Image src="/logo.png" alt="PulseHQ Logo" fill className="object-contain" />
             </div>
-            <span className="text-lg font-bold text-gray-900">Datahive</span>
+            <span className="text-lg font-bold text-slate-900 dark:text-slate-100">PulseHQ</span>
           </div>
         )}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100"
+          className="rounded-lg p-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-colors"
         >
           {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
         </button>
@@ -73,10 +74,10 @@ export default function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`group flex items-center gap-3 rounded-lg px-4 py-2.5 transition-colors ${
+              className={`group flex items-center gap-3 rounded-lg px-4 py-2.5 transition-all duration-200 ease-in-out hover:translate-x-1 active:scale-[0.98] ${
                 pathname?.startsWith(item.href)
-                  ? 'bg-indigo-50 text-indigo-600'
-                  : 'text-gray-700 hover:bg-gray-50'
+                  ? 'bg-indigo-100/50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
               }`}
               title={isCollapsed ? item.label : undefined}
             >
@@ -88,19 +89,19 @@ export default function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="flex flex-col gap-2 border-t border-gray-200 pt-4">
+      <div className="flex flex-col gap-2 border-t border-slate-200 dark:border-slate-800/50 pt-4">
         <Link 
           href="/settings"
-          className={`group flex items-center gap-3 rounded-lg px-4 py-2.5 transition-colors ${
+          className={`group flex items-center gap-3 rounded-lg px-4 py-2.5 transition-all duration-200 ease-in-out hover:translate-x-1 active:scale-[0.98] ${
             pathname?.startsWith('/settings')
-              ? 'bg-indigo-50 text-indigo-600'
-              : 'text-gray-700 hover:bg-gray-100'
+              ? 'bg-indigo-100/50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
           }`}
         >
           <Settings size={20} />
           {!isCollapsed && <span className="text-sm font-medium">Settings</span>}
         </Link>
-        <button onClick={handleLogout} className="group flex items-center gap-3 rounded-lg px-4 py-2.5 text-gray-700 transition-colors hover:bg-red-50 hover:text-red-600">
+        <button onClick={handleLogout} className="group flex items-center gap-3 rounded-lg px-4 py-2.5 text-slate-600 dark:text-slate-400 transition-all duration-200 ease-in-out hover:translate-x-1 active:scale-[0.98] hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400">
           <LogOut size={20} />
           {!isCollapsed && <span className="text-sm font-medium">Logout</span>}
         </button>

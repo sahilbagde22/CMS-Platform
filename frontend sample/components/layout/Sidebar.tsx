@@ -35,9 +35,9 @@ export default function Sidebar() {
         {!isCollapsed && (
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600">
-              <span className="text-sm font-bold text-white">D</span>
+              <span className="text-sm font-bold text-white">P</span>
             </div>
-            <span className="text-lg font-bold text-gray-900">Datahive</span>
+            <span className="text-lg font-bold text-gray-900">PulseHQ</span>
           </div>
         )}
         <button
