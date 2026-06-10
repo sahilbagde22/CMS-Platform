@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useEffect, useState, useMemo, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Users, Upload, Search } from 'lucide-react';
 import { StatusBadge } from '@/components/shared/StatusBadge';
@@ -28,7 +28,7 @@ function TableSkeleton() {
   );
 }
 
-export default function EmployeesPage() {
+function EmployeesContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [employees, setEmployees] = useState<EmployeeListItem[]>([]);
@@ -254,5 +254,13 @@ export default function EmployeesPage() {
         )}
       </Card>
     </div>
+  );
+}
+
+export default function EmployeesPage() {
+  return (
+    <Suspense fallback={<div className="p-6">Loading...</div>}>
+      <EmployeesContent />
+    </Suspense>
   );
 }

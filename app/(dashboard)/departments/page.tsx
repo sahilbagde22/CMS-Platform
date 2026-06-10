@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Building2, Upload, Search } from 'lucide-react';
@@ -17,7 +17,7 @@ function SkeletonCard() {
   return <Card className="h-44 animate-pulse bg-gray-100" />;
 }
 
-export default function DepartmentsPage() {
+function DepartmentsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [departments, setDepartments] = useState<DepartmentListItem[]>([]);
@@ -198,5 +198,13 @@ export default function DepartmentsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function DepartmentsPage() {
+  return (
+    <Suspense fallback={<div className="p-6">Loading...</div>}>
+      <DepartmentsContent />
+    </Suspense>
   );
 }

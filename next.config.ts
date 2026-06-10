@@ -1,10 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  devIndicators: {
-    buildActivity: false,
-    appIsrStatus: false,
-  },
+  // devIndicators: { ... } removed due to invalid properties in Next.js 16
 };
 
 export default nextConfig;

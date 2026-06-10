@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FolderKanban, Upload, Search } from 'lucide-react';
 import { EmptyState } from '@/components/shared/EmptyState';
@@ -26,7 +26,7 @@ function TableSkeleton() {
   );
 }
 
-export default function ProjectsPage() {
+function ProjectsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [projects, setProjects] = useState<ProjectListItem[]>([]);
@@ -203,5 +203,13 @@ export default function ProjectsPage() {
         )}
       </Card>
     </div>
+  );
+}
+
+export default function ProjectsPage() {
+  return (
+    <Suspense fallback={<div className="p-6">Loading...</div>}>
+      <ProjectsContent />
+    </Suspense>
   );
 }
