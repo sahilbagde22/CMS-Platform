@@ -20,10 +20,16 @@ export async function GET() {
   try {
     const supabase = await createClient();
 
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return NextResponse.json({ success: false, error: 'Unauthorized', code: 'UNAUTHORIZED' }, { status: 401 });
+    }
+
     // Get all uploads that are in 'ready' status, ordered chronologically
     const { data: uploads, error: uploadError } = await supabase
       .from('uploads')
       .select('id, uploaded_at, file_name')
+      .eq('user_id', user.id)
       .eq('status', 'ready')
       .order('uploaded_at', { ascending: true });
 

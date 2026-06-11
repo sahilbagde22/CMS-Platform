@@ -23,10 +23,16 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse<Em
     // Sanitize sort column
     const sortColumn = ALLOWED_SORT_COLUMNS.has(sortRaw) ? sortRaw : 'name';
 
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return NextResponse.json({ success: false, error: 'Unauthorized', code: 'UNAUTHORIZED' }, { status: 401 });
+    }
+
     // Get latest ready upload
     const { data: latestUpload } = await supabase
       .from('uploads')
       .select('id')
+      .eq('user_id', user.id)
       .eq('status', 'ready')
       .order('uploaded_at', { ascending: false })
       .limit(1)

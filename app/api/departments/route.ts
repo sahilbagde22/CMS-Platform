@@ -8,9 +8,15 @@ export async function GET(): Promise<NextResponse<ApiResponse<DepartmentListItem
   try {
     const supabase = await createClient();
 
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return NextResponse.json({ success: false, error: 'Unauthorized', code: 'UNAUTHORIZED' }, { status: 401 });
+    }
+
     const { data: latestUpload } = await supabase
       .from('uploads')
       .select('id')
+      .eq('user_id', user.id)
       .eq('status', 'ready')
       .order('uploaded_at', { ascending: false })
       .limit(1)

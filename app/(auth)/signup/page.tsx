@@ -53,7 +53,7 @@ export default function SignupPage() {
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-50 border border-emerald-100 mb-2">
               <CheckCircle className="w-6 h-6 text-emerald-600" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900">Check your email</h3>
+            <h3 className="text-lg font-medium text-gray-900">Success!</h3>
             <p className="text-sm text-gray-500 pb-4">{success}</p>
             <Link 
               href="/login"

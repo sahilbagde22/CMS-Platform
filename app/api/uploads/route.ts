@@ -6,10 +6,16 @@ export async function GET() {
   try {
     const supabase = await createClient();
 
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return NextResponse.json({ success: false, error: 'Unauthorized', code: 'UNAUTHORIZED' }, { status: 401 });
+    }
+
     // Get all uploads ordered chronologically (newest first)
     const { data: uploads, error: uploadError } = await supabase
       .from('uploads')
       .select('id, uploaded_at, file_name, file_size, status, error_msg')
+      .eq('user_id', user.id)
       .order('uploaded_at', { ascending: false });
 
     if (uploadError) {

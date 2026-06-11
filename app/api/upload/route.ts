@@ -42,6 +42,11 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse<U
   try {
     const supabase = await createClient();
 
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return NextResponse.json({ success: false, error: 'Unauthorized', code: 'UNAUTHORIZED' }, { status: 401 });
+    }
+
     // 1. Parse form data
     const formData = await req.formData();
     const file = formData.get('file') as File | null;
@@ -120,6 +125,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse<U
     const { data: uploadRecord, error: uploadInsertError } = await supabase
       .from('uploads')
       .insert({
+        user_id: user.id,
         file_name: file.name,
         storage_path: storagePath,
         file_size: file.size,

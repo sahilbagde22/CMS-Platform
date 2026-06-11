@@ -35,7 +35,7 @@ export async function signup(formData: FormData) {
 
   const supabase = await createClient();
 
-  const { error } = await supabase.auth.signUp({
+  const { error, data } = await supabase.auth.signUp({
     email,
     password,
   });
@@ -44,8 +44,12 @@ export async function signup(formData: FormData) {
     return { error: error.message };
   }
 
-  // Supabase sends a confirmation email by default unless disabled.
-  return { success: 'Check your email to confirm your account' };
+  // If Supabase automatically logs the user in, sign them out so they must log in manually.
+  if (data?.session) {
+    await supabase.auth.signOut();
+  }
+
+  return { success: 'Account created successfully! Please log in.' };
 }
 
 export async function logout() {
